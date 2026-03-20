@@ -25,8 +25,10 @@ function escapeHTML(str) {
   })[m]);
 }
 
-function normalize(code) {
-  return code.replace("https://cfx.re/join/", "").trim();
+// AUTO-DETECT CFX CODE
+function extractCFX(input) {
+  const match = input.match(/([a-zA-Z0-9]{6,8})$/);
+  return match ? match[1] : null;
 }
 
 async function fetchServer(code) {
@@ -42,7 +44,9 @@ async function analyze() {
   const raw = input.value.trim();
   if (!raw) return alert("Enter a CFX code");
 
-  const code = normalize(raw);
+  // AUTO-DETECT CODE
+  const code = extractCFX(raw);
+  if (!code) return alert("Invalid CFX link or code.");
 
   greeting.style.display = "none";
   serverInfo.style.display = "block";
