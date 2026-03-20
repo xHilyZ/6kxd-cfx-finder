@@ -95,14 +95,14 @@ function renderServer(data) {
   const descEl = document.getElementById("serverDesc");
   const locEl = document.getElementById("serverLoc");
 
-  // Server logo (banner_detail)
+  // REAL FiveM server icon
   const iconEl = document.querySelector(".server-icon");
+  const iconUrl = `https://servers-frontend.fivem.net/api/servers/icon/${data.EndPoint}.png`;
 
-  if (d.vars?.banner_detail) {
-    iconEl.style.backgroundImage = `url(${d.vars.banner_detail})`;
-  } else {
-    iconEl.style.backgroundImage = "url('https://via.placeholder.com/110x110/1e293b/ffffff?text=No+Logo')";
-  }
+  iconEl.style.backgroundImage = `url(${iconUrl})`;
+  iconEl.style.backgroundSize = "cover";
+  iconEl.style.backgroundPosition = "center";
+  iconEl.style.backgroundRepeat = "no-repeat";
 
   nameEl.textContent = escapeHTML(cleanName(d.hostname));
   ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
@@ -159,7 +159,6 @@ openFullPanel.onclick = () => {
 
   let pHtml = "<ul>";
   d.players.forEach(p => {
-
     let pingClass =
       p.ping <= 60 ? "ping-good" :
       p.ping <= 120 ? "ping-mid" :
@@ -185,11 +184,6 @@ openFullPanel.onclick = () => {
 
   fullPanel.classList.add("open");
   overlay.classList.add("show");
-};
-
-closePanel.onclick = () => {
-fullPanel.classList.add("open");
-overlay.classList.add("show");
 };
 
 closePanel.onclick = () => {
