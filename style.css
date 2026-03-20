@@ -112,6 +112,14 @@ input {
   margin-top: 25px;
 }
 
+/* JSON BUTTONS CENTERED */
+.json-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
 /* RECENT LOOKUPS */
 .recent-lookups {
   margin-bottom: 20px;
@@ -284,11 +292,12 @@ input {
 }
 
 /* JSON OUTPUT */
-.json-buttons {
-  display: flex;
-  justify-content: center;   /* centers horizontally */
-  gap: 12px;                 /* spacing between buttons */
+.json-output {
   margin-top: 20px;
+  padding: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
 }
 
 /* OVERLAY */
@@ -441,4 +450,17 @@ input {
   text-align: center;
   font-size: 14px;
   color: #9ca3af;
+}
+
+/* RESPONSIVE FIX — Prevent panel overflow */
+@media (max-width: 1100px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .full-panel {
+    height: 90%;
+    padding: 20px;
+  }
 }
