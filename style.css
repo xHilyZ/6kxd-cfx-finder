@@ -1,7 +1,5 @@
-/* IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-/* GLOBAL */
 body {
   background: #0a0c10;
   color: #e5e7eb;
@@ -138,6 +136,8 @@ input {
   height: 110px;
   background: #1e293b;
   border-radius: 12px;
+  background-size: cover;
+  background-position: center;
 }
 
 .server-name {
@@ -146,6 +146,7 @@ input {
   color: #dbeafe;
 }
 
+/* STAT GRID */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -156,6 +157,14 @@ input {
 .stat-box {
   padding: 12px;
   text-align: center;
+  transition: 0.25s ease;
+  cursor: pointer;
+}
+
+.stat-box:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
 }
 
 .stat-box h4 {
@@ -216,6 +225,7 @@ input {
   color: #bfdbfe;
   margin-bottom: 20px;
   font-weight: 700;
+  text-shadow: 0 0 12px rgba(96,165,250,0.4);
 }
 
 .panel-heading {
@@ -232,18 +242,55 @@ input {
   gap: 40px;
 }
 
-/* LISTS */
-#fullPlayers li,
-#fullResources li {
+/* PLAYER LIST */
+#fullPlayers ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#fullPlayers li {
   padding: 8px 0;
   border-bottom: 1px solid #1e293b;
   font-size: 15px;
 }
 
-#fullPlayers ul,
+.player-id {
+  color: #60a5fa;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.player-name {
+  color: #e5e7eb;
+}
+
+.player-ping {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.ping-good { color: #4ade80; }
+.ping-mid { color: #facc15; }
+.ping-bad { color: #f87171; }
+
+/* RESOURCES */
 #fullResources ul {
   list-style: none;
   padding-left: 0;
+}
+
+#fullResources li {
+  padding: 6px 0;
+  border-bottom: 1px solid #1e293b;
+  color: #cbd5e1;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  transition: 0.2s ease;
+}
+
+#fullResources li:hover {
+  color: #93c5fd;
+  transform: translateX(4px);
 }
 
 /* CLOSE BUTTON */

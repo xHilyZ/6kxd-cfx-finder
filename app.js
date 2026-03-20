@@ -47,7 +47,7 @@ async function analyze() {
   greeting.style.display = "none";
   serverInfo.style.display = "block";
 
-  // ⭐ Proper loading state (does NOT delete HTML)
+  // Proper loading state
   serverInfo.style.opacity = "0.4";
   document.getElementById("serverName").textContent = "Loading...";
   document.getElementById("serverIP").textContent = "";
@@ -95,10 +95,9 @@ function renderServer(data) {
   const descEl = document.getElementById("serverDesc");
   const locEl = document.getElementById("serverLoc");
 
-  if (!nameEl || !ipEl || !playersEl || !resourcesEl || !buildEl || !localeEl || !descEl || !locEl) {
-    console.error("Missing HTML elements — check your IDs");
-    return;
-  }
+  // Server icon
+  const iconEl = document.querySelector(".server-icon");
+  iconEl.style.backgroundImage = `url(https://servers-frontend.fivem.net/api/servers/single/${data.EndPoint}/icon)`;
 
   nameEl.textContent = escapeHTML(cleanName(d.hostname));
   ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
@@ -111,7 +110,6 @@ function renderServer(data) {
   descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
   locEl.textContent = "Location info unavailable.";
 
-  // ⭐ Restore full opacity after loading
   serverInfo.style.opacity = "1";
 }
 
@@ -156,7 +154,19 @@ openFullPanel.onclick = () => {
 
   let pHtml = "<ul>";
   d.players.forEach(p => {
-    pHtml += `<li>[${p.id}] ${escapeHTML(p.name)} — ${p.ping}ms</li>`;
+
+    let pingClass =
+      p.ping <= 60 ? "ping-good" :
+      p.ping <= 120 ? "ping-mid" :
+      "ping-bad";
+
+    pHtml += `
+      <li>
+        <span class="player-id">[${p.id}]</span>
+        <span class="player-name">${escapeHTML(p.name)}</span>
+        <span class="player-ping ${pingClass}">${p.ping}ms</span>
+      </li>
+    `;
   });
   pHtml += "</ul>";
   fullPlayers.innerHTML = pHtml;
