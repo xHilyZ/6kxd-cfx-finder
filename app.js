@@ -6,18 +6,22 @@ const resourcesDiv = document.getElementById("resources");
 const jsonOutput = document.getElementById("jsonOutput");
 const jsonButtons = document.getElementById("jsonButtons");
 const greeting = document.getElementById("greeting");
-const limitBanner = document.getElementById("limitBanner");
 
 let lookupCount = 0;
 const DAILY_LIMIT = 3;
 let lastData = null;
+
+// REMOVE FIVEM COLOR CODES (^1 ^2 ^3 etc)
+function cleanName(name) {
+  return name.replace(/\^[0-9]/g, "");
+}
 
 function normalize(code) {
   return code.replace("https://cfx.re/join/", "").trim();
 }
 
 async function fetchServer(code) {
-  const url = `/api/resolve?code=${code}`;
+  const url = `${window.location.origin}/api/resolve?code=${code}`;
   const res = await fetch(url);
 
   if (!res.ok) throw new Error("Invalid CFX code");
@@ -70,7 +74,7 @@ async function analyze() {
 function renderServer(data) {
   const d = data.Data;
 
-  document.getElementById("serverName").textContent = d.hostname;
+  document.getElementById("serverName").textContent = cleanName(d.hostname);
   document.getElementById("serverIP").textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
 
   document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
