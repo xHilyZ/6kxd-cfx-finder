@@ -95,6 +95,7 @@ analyzeBtn.onclick = analyze;
 
 /* FULL PANEL LOGIC */
 const fullPanel = document.getElementById("fullPanel");
+const overlay = document.getElementById("overlay");
 const openFullPanel = document.getElementById("openFullPanel");
 const closePanel = document.getElementById("closePanel");
 const fullPlayers = document.getElementById("fullPlayers");
@@ -120,8 +121,15 @@ openFullPanel.onclick = () => {
   fullResources.innerHTML = rHtml;
 
   fullPanel.classList.add("open");
+  overlay.classList.add("show");
 };
 
 closePanel.onclick = () => {
   fullPanel.classList.remove("open");
+  overlay.classList.remove("show");
+};
+
+overlay.onclick = () => {
+  fullPanel.classList.remove("open");
+  overlay.classList.remove("show");
 };

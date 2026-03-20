@@ -11,8 +11,9 @@ body {
 }
 
 h1 {
-  font-size: 28px;
+  font-size: 32px;
   margin-bottom: 4px;
+  font-weight: 700;
 }
 
 .subtitle {
@@ -27,29 +28,36 @@ h1 {
 
 input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid #1f2933;
   background: #0b0d14;
   color: white;
+  font-size: 15px;
 }
 
 button {
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
   background: #f59e0b;
   color: black;
   font-weight: bold;
+  font-size: 14px;
 }
 
 .section {
   margin-top: 20px;
-  padding: 15px;
+  padding: 18px;
   background: #0b0d14;
   border-radius: 10px;
   border: 1px solid #1f2933;
+}
+
+.full-btn {
+  width: 100%;
+  margin-top: 25px;
 }
 
 .limit-banner {
@@ -74,6 +82,22 @@ button {
   border: 1px solid #1f2933;
   max-height: 300px;
   overflow: auto;
+}
+
+/* OVERLAY */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 9998;
+}
+
+.overlay.show {
+  opacity: 1;
+  pointer-events: all;
 }
 
 /* FULL PANEL */
@@ -103,12 +127,13 @@ button {
 
 .close-btn {
   margin-top: 20px;
-  padding: 10px 16px;
-  background: #f43f5e;
+  padding: 12px 18px;
+  background: #ef4444;
   border: none;
   border-radius: 8px;
   color: white;
   cursor: pointer;
+  width: 100%;
 }
 
 /* TWO COLUMN GRID */
