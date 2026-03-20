@@ -45,9 +45,18 @@ async function analyze() {
   const code = normalize(raw);
 
   greeting.style.display = "none";
-
   serverInfo.style.display = "block";
-  serverInfo.innerHTML = "Loading...";
+
+  // ⭐ Proper loading state (does NOT delete HTML)
+  serverInfo.style.opacity = "0.4";
+  document.getElementById("serverName").textContent = "Loading...";
+  document.getElementById("serverIP").textContent = "";
+  document.getElementById("statPlayers").textContent = "";
+  document.getElementById("statResources").textContent = "";
+  document.getElementById("statBuild").textContent = "";
+  document.getElementById("statLocale").textContent = "";
+  document.getElementById("serverDesc").textContent = "";
+  document.getElementById("serverLoc").textContent = "";
 
   playersDiv.style.display = "none";
   resourcesDiv.style.display = "none";
@@ -70,7 +79,7 @@ async function analyze() {
 
   } catch (err) {
     console.error(err);
-    serverInfo.innerHTML = "Failed to fetch server data.";
+    document.getElementById("serverName").textContent = "Failed to fetch server data.";
   }
 }
 
@@ -101,6 +110,9 @@ function renderServer(data) {
 
   descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
   locEl.textContent = "Location info unavailable.";
+
+  // ⭐ Restore full opacity after loading
+  serverInfo.style.opacity = "1";
 }
 
 function renderPlayers(players) {
