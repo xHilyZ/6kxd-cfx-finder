@@ -7,13 +7,22 @@ const jsonOutput = document.getElementById("jsonOutput");
 const jsonButtons = document.getElementById("jsonButtons");
 const greeting = document.getElementById("greeting");
 
-let lookupCount = 0;
-const DAILY_LIMIT = 3;
 let lastData = null;
 
 // REMOVE FIVEM COLOR CODES (^1 ^2 ^3 etc)
 function cleanName(name) {
   return name.replace(/\^[0-9]/g, "");
+}
+
+// ESCAPE HTML (fixes <3 and other breaking characters)
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[m]);
 }
 
 function normalize(code) {
@@ -32,13 +41,6 @@ async function fetchServer(code) {
 async function analyze() {
   const raw = input.value.trim();
   if (!raw) return alert("Enter a CFX code");
-
-  if (lookupCount >= DAILY_LIMIT) {
-    limitBanner.style.display = "block";
-    return;
-  }
-
-  lookupCount++;
 
   const code = normalize(raw);
 
@@ -67,6 +69,7 @@ async function analyze() {
     document.getElementById("openFullPanel").style.display = "block";
 
   } catch (err) {
+    console.error(err);
     serverInfo.innerHTML = "Failed to fetch server data.";
   }
 }
@@ -74,7 +77,7 @@ async function analyze() {
 function renderServer(data) {
   const d = data.Data;
 
-  document.getElementById("serverName").textContent = cleanName(d.hostname);
+  document.getElementById("serverName").textContent = escapeHTML(cleanName(d.hostname));
   document.getElementById("serverIP").textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
 
   document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
@@ -82,7 +85,7 @@ function renderServer(data) {
   document.getElementById("statBuild").textContent = d.vars?.sv_enforceGameBuild || "Unknown";
   document.getElementById("statLocale").textContent = d.locale || "Unknown";
 
-  document.getElementById("serverDesc").textContent = d.vars?.sv_projectDesc || "No description";
+  document.getElementById("serverDesc").textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
   document.getElementById("serverLoc").textContent = "Location info unavailable.";
 }
 
@@ -127,14 +130,14 @@ openFullPanel.onclick = () => {
 
   let pHtml = "<ul>";
   d.players.forEach(p => {
-    pHtml += `<li>[${p.id}] ${p.name} — ${p.ping}ms</li>`;
+    pHtml += `<li>[${p.id}] ${escapeHTML(p.name)} — ${p.ping}ms</li>`;
   });
   pHtml += "</ul>";
   fullPlayers.innerHTML = pHtml;
 
   let rHtml = "<ul>";
   d.resources.forEach(r => {
-    rHtml += `<li>${r}</li>`;
+    rHtml += `<li>${escapeHTML(r)}</li>`;
   });
   rHtml += "</ul>";
   fullResources.innerHTML = rHtml;
