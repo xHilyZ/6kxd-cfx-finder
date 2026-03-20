@@ -238,7 +238,7 @@ async function renderServer(data) {
   playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
   resourcesEl.textContent = d.resources.length;
   buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
-  localeEl.textContent = await fetchGeoIP(ip) || "Unknown";
+  localeEl.textContent = ip ? await fetchGeoIP(ip) : "Unknown";
 
   descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
   locEl.textContent = "Location info unavailable.";
