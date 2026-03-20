@@ -1,3 +1,102 @@
+/* GLOBAL */
+body {
+  background: #0a0c10;
+  color: #e5e7eb;
+  font-family: "Georgia", serif;
+  padding: 40px;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 700;
+  color: #dbeafe;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 30px;
+  font-size: 18px;
+}
+
+/* GLASS EFFECT */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+/* INPUT CARD */
+.input-card {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
+  background: #0f172a;
+  color: white;
+  font-size: 16px;
+}
+
+/* BUTTONS */
+.btn-primary {
+  padding: 14px 20px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  padding: 12px 18px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #334155;
+}
+
+.full-btn {
+  width: 100%;
+  margin-top: 25px;
+}
+
+/* INFO CARDS */
+.info-card {
+  margin-top: 20px;
+}
+
+/* JSON OUTPUT */
+.json-output {
+  margin-top: 20px;
+  padding: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
 /* OVERLAY */
 .overlay {
   position: fixed;
@@ -21,61 +120,59 @@
   left: 0;
   width: 100%;
   height: 80%;
-  background: #0b0d14;
-  border-top: 2px solid #1f2933;
   transition: bottom 0.35s ease;
-  padding: 20px;
+  padding: 30px;
   overflow-y: auto;
-  z-index: 9999; /* ABOVE overlay */
+  z-index: 9999;
 }
 
 .full-panel.open {
   bottom: 0;
 }
 
-.full-panel-content {
-  max-width: 900px;
-  margin: auto;
-  color: #f5f5f5;
+.panel-title {
+  font-size: 32px;
+  color: #bfdbfe;
+  margin-bottom: 20px;
 }
 
-/* CLOSE BUTTON — FIXED + CLEAN */
-.close-btn {
-  margin-top: 25px;
-  padding: 12px 18px;
-  background: #ef4444;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  cursor: pointer;
-  width: 100%;
-  font-size: 15px;
-  font-weight: 600;
+.panel-heading {
+  color: #60a5fa;
+  font-size: 20px;
+  margin-bottom: 10px;
 }
 
-/* TWO COLUMN GRID */
+/* GRID */
 .panel-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-top: 20px;
+  gap: 40px;
 }
 
-.panel-grid h3 {
-  margin-bottom: 10px;
-  color: #a3e635;
-  font-size: 18px;
-}
-
+/* LISTS */
 #fullPlayers li,
 #fullResources li {
-  padding: 6px 0;
-  border-bottom: 1px solid #1f2933;
-  font-size: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid #1e293b;
+  font-size: 15px;
 }
 
 #fullPlayers ul,
 #fullResources ul {
   list-style: none;
   padding-left: 0;
+}
+
+/* CLOSE BUTTON */
+.close-btn {
+  margin-top: 30px;
+  padding: 14px;
+  background: #ef4444;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
 }

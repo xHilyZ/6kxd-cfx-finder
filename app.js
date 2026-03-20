@@ -1,3 +1,99 @@
+const input = document.getElementById("cfxInput");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const serverInfo = document.getElementById("serverInfo");
+const playersDiv = document.getElementById("players");
+const resourcesDiv = document.getElementById("resources");
+const jsonOutput = document.getElementById("jsonOutput");
+const limitBanner = document.getElementById("limitBanner");
+
+let lookupCount = 0;
+const DAILY_LIMIT = 3;
+let lastData = null;
+
+function normalize(code) {
+  return code.replace("https://cfx.re/join/", "").trim();
+}
+
+async function fetchServer(code) {
+  const url = `/api/resolve?code=${code}`;
+  const res = await fetch(url);
+
+  if (!res.ok) throw new Error("Invalid CFX code");
+
+  return res.json();
+}
+
+async function analyze() {
+  const raw = input.value.trim();
+  if (!raw) return alert("Enter a CFX code");
+
+  if (lookupCount >= DAILY_LIMIT) {
+    limitBanner.style.display = "block";
+    return;
+  }
+
+  lookupCount++;
+
+  const code = normalize(raw);
+
+  serverInfo.innerHTML = "Loading...";
+  playersDiv.innerHTML = "";
+  resourcesDiv.innerHTML = "";
+  jsonOutput.style.display = "none";
+
+  try {
+    const data = await fetchServer(code);
+    lastData = data;
+
+    renderServer(data);
+    renderPlayers(data.Data.players);
+    renderResources(data.Data.resources);
+  } catch (err) {
+    serverInfo.innerHTML = "Failed to fetch server data.";
+  }
+}
+
+function renderServer(data) {
+  const d = data.Data;
+
+  serverInfo.innerHTML = `
+    <h3>${d.hostname}</h3>
+    <p><strong>IP:</strong> ${d.connectEndPoints?.[0] || "Unknown"}</p>
+    <p><strong>Players:</strong> ${d.clients} / ${d.sv_maxclients}</p>
+    <p><strong>Resources:</strong> ${d.resources.length} assets</p>
+    <p><strong>Game Build:</strong> ${d.vars?.sv_enforceGameBuild || "Unknown"}</p>
+    <p><strong>Locale:</strong> ${d.locale || "Unknown"}</p>
+    <p><strong>Description:</strong> ${d.vars?.sv_projectDesc || "No description"}</p>
+  `;
+}
+
+function renderPlayers(players) {
+  playersDiv.innerHTML = `
+    <h3>Players</h3>
+    <p>${players.length} players online</p>
+  `;
+}
+
+function renderResources(resources) {
+  resourcesDiv.innerHTML = `
+    <h3>Resources</h3>
+    <p>${resources.length} resources loaded</p>
+  `;
+}
+
+document.getElementById("playersJson").onclick = () => {
+  jsonOutput.style.display = "block";
+  jsonOutput.textContent = JSON.stringify(lastData?.Data?.players || {}, null, 2);
+};
+
+document.getElementById("infoJson").onclick = () => {
+  jsonOutput.style.display = "block";
+  jsonOutput.textContent = JSON.stringify(lastData?.Data || {}, null, 2);
+};
+
+analyzeBtn.onclick = analyze;
+
+/* FULL PANEL LOGIC */
 const fullPanel = document.getElementById("fullPanel");
 const overlay = document.getElementById("overlay");
 const openFullPanel = document.getElementById("openFullPanel");
@@ -10,7 +106,6 @@ openFullPanel.onclick = () => {
 
   const d = lastData.Data;
 
-  // Players
   let pHtml = "<ul>";
   d.players.forEach(p => {
     pHtml += `<li>[${p.id}] ${p.name} — ${p.ping}ms</li>`;
@@ -18,7 +113,6 @@ openFullPanel.onclick = () => {
   pHtml += "</ul>";
   fullPlayers.innerHTML = pHtml;
 
-  // Resources
   let rHtml = "<ul>";
   d.resources.forEach(r => {
     rHtml += `<li>${r}</li>`;

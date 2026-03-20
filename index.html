@@ -8,51 +8,51 @@
 <body>
 
   <div class="container">
-    <h1>6kxd CFX Finder</h1>
-    <p class="subtitle">Cfx.re Server Finder</p>
+    <h1 class="title">6kxd CFX Finder</h1>
+    <p class="subtitle">CFX.re Server Lookup Tool</p>
 
-    <div class="input-row">
+    <div class="input-card glass">
       <input id="cfxInput" type="text" placeholder="Enter CFX code or join link">
-      <button id="analyzeBtn">Analyze</button>
+      <button id="analyzeBtn" class="btn-primary">Analyze</button>
     </div>
 
     <div id="limitBanner" class="limit-banner" style="display:none;">
       Daily limit reached.
     </div>
 
-    <div id="serverInfo" class="section"></div>
-    <div id="players" class="section"></div>
-    <div id="resources" class="section"></div>
+    <div id="serverInfo" class="info-card glass"></div>
+    <div id="players" class="info-card glass"></div>
+    <div id="resources" class="info-card glass"></div>
 
     <div class="json-buttons">
-      <button id="playersJson">Players JSON</button>
-      <button id="infoJson">Server Info JSON</button>
+      <button id="playersJson" class="btn-secondary">Players JSON</button>
+      <button id="infoJson" class="btn-secondary">Server Info JSON</button>
     </div>
 
     <button id="openFullPanel" class="btn-primary full-btn">
       View Full Player & Resource Lists
     </button>
 
-    <pre id="jsonOutput" class="json-output" style="display:none;"></pre>
+    <pre id="jsonOutput" class="json-output glass" style="display:none;"></pre>
   </div>
 
   <!-- OVERLAY -->
   <div id="overlay" class="overlay"></div>
 
   <!-- FULL PANEL -->
-  <div id="fullPanel" class="full-panel">
+  <div id="fullPanel" class="full-panel glass">
     <div class="full-panel-content">
 
-      <h2>Server Data Details</h2>
+      <h2 class="panel-title">Server Data Details</h2>
 
       <div class="panel-grid">
         <div>
-          <h3>Online Players</h3>
+          <h3 class="panel-heading">Online Players</h3>
           <div id="fullPlayers"></div>
         </div>
 
         <div>
-          <h3>Resources List</h3>
+          <h3 class="panel-heading">Resources List</h3>
           <div id="fullResources"></div>
         </div>
       </div>
