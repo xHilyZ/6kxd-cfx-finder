@@ -95,9 +95,14 @@ function renderServer(data) {
   const descEl = document.getElementById("serverDesc");
   const locEl = document.getElementById("serverLoc");
 
-  // Server icon
+  // Server logo (banner_detail)
   const iconEl = document.querySelector(".server-icon");
-  iconEl.style.backgroundImage = `url(https://servers-frontend.fivem.net/api/servers/single/${data.EndPoint}/icon)`;
+
+  if (d.vars?.banner_detail) {
+    iconEl.style.backgroundImage = `url(${d.vars.banner_detail})`;
+  } else {
+    iconEl.style.backgroundImage = "url('https://via.placeholder.com/110x110/1e293b/ffffff?text=No+Logo')";
+  }
 
   nameEl.textContent = escapeHTML(cleanName(d.hostname));
   ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
@@ -180,6 +185,11 @@ openFullPanel.onclick = () => {
 
   fullPanel.classList.add("open");
   overlay.classList.add("show");
+};
+
+closePanel.onclick = () => {
+fullPanel.classList.add("open");
+overlay.classList.add("show");
 };
 
 closePanel.onclick = () => {
