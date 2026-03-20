@@ -10,12 +10,14 @@ let lookupCount = 0;
 const DAILY_LIMIT = 3;
 let lastData = null;
 
+// Normalize CFX link → code
 function normalize(code) {
   return code.replace("https://cfx.re/join/", "").trim();
 }
 
+// Fetch from YOUR Vercel backend, not FiveM directly
 async function fetchServer(code) {
-  const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
+  const url = `/api/resolve?code=${code}`;
   const res = await fetch(url);
 
   if (!res.ok) throw new Error("Invalid CFX code");
