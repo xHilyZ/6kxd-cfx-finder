@@ -1,3 +1,7 @@
+export const config = {
+  runtime: "nodejs",
+};
+
 export default async function handler(req, res) {
   const { code } = req.query;
 
