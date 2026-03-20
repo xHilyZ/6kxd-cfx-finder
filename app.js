@@ -17,7 +17,9 @@ function normalize(code) {
 async function fetchServer(code) {
   const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
   const res = await fetch(url);
+
   if (!res.ok) throw new Error("Invalid CFX code");
+
   return res.json();
 }
 
@@ -52,10 +54,16 @@ async function analyze() {
 }
 
 function renderServer(data) {
+  const d = data.Data;
+
   serverInfo.innerHTML = `
-    <h3>${data.Data.hostname}</h3>
-    <p>Players: ${data.Data.clients} / ${data.Data.sv_maxclients}</p>
-    <p>Tags: ${data.Data.tags}</p>
+    <h3>${d.hostname}</h3>
+    <p><strong>IP:</strong> ${d.connectEndPoints?.[0] || "Unknown"}</p>
+    <p><strong>Players:</strong> ${d.clients} / ${d.sv_maxclients}</p>
+    <p><strong>Resources:</strong> ${d.resources.length} assets</p>
+    <p><strong>Game Build:</strong> ${d.vars?.sv_enforceGameBuild || "Unknown"}</p>
+    <p><strong>Locale:</strong> ${d.locale || "Unknown"}</p>
+    <p><strong>Description:</strong> ${d.vars?.sv_projectDesc || "No description"}</p>
   `;
 }
 
