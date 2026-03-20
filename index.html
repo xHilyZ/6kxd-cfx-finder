@@ -29,7 +29,26 @@
       <button id="infoJson">Server Info JSON</button>
     </div>
 
+    <button id="openFullPanel" class="btn-primary" style="margin-top:20px;">
+      View Full Player & Resource Lists
+    </button>
+
     <pre id="jsonOutput" class="json-output" style="display:none;"></pre>
+  </div>
+
+  <!-- FULL PANEL -->
+  <div id="fullPanel" class="full-panel">
+    <div class="full-panel-content">
+      <h2>Full Player & Resource Lists</h2>
+
+      <h3>Players</h3>
+      <div id="fullPlayers"></div>
+
+      <h3 style="margin-top:20px;">Resources</h3>
+      <div id="fullResources"></div>
+
+      <button id="closePanel" class="close-btn">Close</button>
+    </div>
   </div>
 
   <script src="app.js"></script>

@@ -10,12 +10,10 @@ let lookupCount = 0;
 const DAILY_LIMIT = 3;
 let lastData = null;
 
-// Normalize CFX link → code
 function normalize(code) {
   return code.replace("https://cfx.re/join/", "").trim();
 }
 
-// Fetch from YOUR Vercel backend, not FiveM directly
 async function fetchServer(code) {
   const url = `/api/resolve?code=${code}`;
   const res = await fetch(url);
@@ -107,3 +105,36 @@ document.getElementById("infoJson").onclick = () => {
 };
 
 analyzeBtn.onclick = analyze;
+
+/* FULL PANEL LOGIC */
+const fullPanel = document.getElementById("fullPanel");
+const openFullPanel = document.getElementById("openFullPanel");
+const closePanel = document.getElementById("closePanel");
+const fullPlayers = document.getElementById("fullPlayers");
+const fullResources = document.getElementById("fullResources");
+
+openFullPanel.onclick = () => {
+  if (!lastData) return alert("Run a lookup first.");
+
+  const d = lastData.Data;
+
+  let pHtml = "<ul>";
+  d.players.forEach(p => {
+    pHtml += `<li>${p.name} (${p.id}) - ${p.ping}ms</li>`;
+  });
+  pHtml += "</ul>";
+  fullPlayers.innerHTML = pHtml;
+
+  let rHtml = "<ul>";
+  d.resources.forEach(r => {
+    rHtml += `<li>${r}</li>`;
+  });
+  rHtml += "</ul>";
+  fullResources.innerHTML = rHtml;
+
+  fullPanel.classList.add("open");
+};
+
+closePanel.onclick = () => {
+  fullPanel.classList.remove("open");
+};
