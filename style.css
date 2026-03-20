@@ -98,9 +98,61 @@ input {
   background: #334155;
 }
 
+.btn-link {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}
+
 .full-btn {
   width: 100%;
   margin-top: 25px;
+}
+
+/* RECENT LOOKUPS */
+.recent-lookups {
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.recent-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.recent-item {
+  padding: 6px 12px;
+  background: #1e293b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.recent-item:hover {
+  background: #334155;
+}
+
+/* AUTO REFRESH */
+.auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.last-refresh {
+  color: #9ca3af;
+  font-size: 14px;
 }
 
 /* GREETING */
@@ -129,10 +181,42 @@ input {
   background-repeat: no-repeat;
 }
 
+/* STATUS INDICATOR */
+.server-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: gray;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+
+.status-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* SERVER NAME */
 .server-name {
   font-size: 28px;
   font-weight: 700;
   color: #dbeafe;
+}
+
+/* SERVER BANNER */
+.banner-wrap {
+  margin: 15px 0;
+}
+
+.server-banner {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
 }
 
 /* STAT GRID */
@@ -165,6 +249,38 @@ input {
 .stat-box p {
   font-size: 16px;
   font-weight: 600;
+}
+
+/* GEOIP COUNTRY */
+.server-country {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #93c5fd;
+}
+
+/* PING HEATMAP */
+.ping-heatmap {
+  margin-top: 20px;
+  padding: 15px;
+}
+
+.heatmap-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.heatmap-label {
+  width: 90px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.heatmap-bar {
+  height: 12px;
+  border-radius: 6px;
+  background: #3b82f6;
+  transition: width 0.3s ease;
 }
 
 /* JSON OUTPUT */
@@ -231,6 +347,29 @@ input {
   gap: 40px;
 }
 
+/* PANEL SEARCH */
+.panel-search {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #0f172a;
+  color: white;
+}
+
+/* RESOURCE CONTROLS */
+.resource-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.small {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
 /* PLAYER LIST */
 #fullPlayers ul {
   list-style: none;
@@ -294,4 +433,13 @@ input {
   width: 100%;
   font-size: 16px;
   font-weight: 700;
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 40px;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #9ca3af;
 }

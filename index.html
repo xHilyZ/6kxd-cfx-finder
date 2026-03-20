@@ -19,8 +19,29 @@
     <p class="subtitle">Get detailed information about any FiveM server instantly</p>
 
     <div class="input-card glass">
-      <input id="cfxInput" type="text" placeholder="Paste CFX link here (e.g., cfx.re/join/xxxx)">
+      <input id="cfxInput" type="text" placeholder="Paste CFX link, IP:PORT, or any message containing a code">
       <button id="analyzeBtn" class="btn-primary">Analyze</button>
+    </div>
+
+    <!-- RECENT LOOKUPS -->
+    <div id="recentLookups" class="recent-lookups glass" style="display:none;">
+      <div class="recent-header">
+        <span>Recent Lookups</span>
+        <button id="clearRecent" class="btn-link">Clear</button>
+      </div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+
+    <!-- AUTO REFRESH -->
+    <div class="auto-refresh glass">
+      <label for="autoRefreshSelect">Auto-refresh:</label>
+      <select id="autoRefreshSelect">
+        <option value="0">Off</option>
+        <option value="10000">Every 10s</option>
+        <option value="30000">Every 30s</option>
+        <option value="60000">Every 60s</option>
+      </select>
+      <span id="lastRefresh" class="last-refresh"></span>
     </div>
 
     <!-- GREETING SCREEN -->
@@ -35,9 +56,22 @@
       </div>
 
       <div class="server-right">
-        <h2 id="serverName" class="server-name"></h2>
+
+        <!-- STATUS INDICATOR -->
+        <div class="server-status-row">
+          <div id="serverStatusDot" class="status-dot"></div>
+          <h2 id="serverName" class="server-name"></h2>
+          <span id="serverStatusText" class="status-text"></span>
+        </div>
+
         <p id="serverIP"></p>
 
+        <!-- SERVER BANNER -->
+        <div id="serverBannerWrap" class="banner-wrap" style="display:none;">
+          <img id="serverBanner" class="server-banner" alt="Server Banner">
+        </div>
+
+        <!-- STATS GRID -->
         <div class="stats-grid">
           <div class="stat-box glass">
             <h4>Players</h4>
@@ -59,6 +93,13 @@
 
         <p id="serverDesc" class="server-desc"></p>
         <p id="serverLoc" class="server-loc"></p>
+
+        <!-- GEOIP COUNTRY -->
+        <p id="serverCountry" class="server-country"></p>
+
+        <!-- PING HEATMAP -->
+        <div id="pingHeatmap" class="ping-heatmap glass" style="display:none;"></div>
+
       </div>
     </div>
 
@@ -85,20 +126,36 @@
       <h2 class="panel-title">Server Data Details</h2>
 
       <div class="panel-grid">
+
+        <!-- PLAYERS PANEL -->
         <div>
           <h3 class="panel-heading">Online Players</h3>
+          <input id="playerSearch" class="panel-search" type="text" placeholder="Search players by name, ID, or ping">
           <div id="fullPlayers"></div>
         </div>
 
+        <!-- RESOURCES PANEL -->
         <div>
           <h3 class="panel-heading">Resources List</h3>
+
+          <div class="resource-controls">
+            <input id="resourceSearch" class="panel-search" type="text" placeholder="Search resources">
+            <button id="resourceSort" class="btn-secondary small">Sort A–Z</button>
+          </div>
+
           <div id="fullResources"></div>
         </div>
+
       </div>
 
       <button id="closePanel" class="close-btn">Close Panel</button>
     </div>
   </div>
+
+  <!-- FOOTER -->
+  <footer class="footer glass">
+    <span>Built by 6kxd | Powered by CFX.re</span>
+  </footer>
 
   <script src="app.js"></script>
 </body>
