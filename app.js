@@ -1,8 +1,6 @@
 const input = document.getElementById("cfxInput");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const serverInfo = document.getElementById("serverInfo");
-const playersDiv = document.getElementById("players");
-const resourcesDiv = document.getElementById("resources");
 const jsonOutput = document.getElementById("jsonOutput");
 const jsonButtons = document.getElementById("jsonButtons");
 const greeting = document.getElementById("greeting");
@@ -62,8 +60,6 @@ async function analyze() {
   document.getElementById("serverDesc").textContent = "";
   document.getElementById("serverLoc").textContent = "";
 
-  playersDiv.style.display = "none";
-  resourcesDiv.style.display = "none";
   jsonButtons.style.display = "none";
   document.getElementById("openFullPanel").style.display = "none";
   jsonOutput.style.display = "none";
@@ -73,11 +69,7 @@ async function analyze() {
     lastData = data;
 
     renderServer(data);
-    renderPlayers(data.Data.players);
-    renderResources(data.Data.resources);
 
-    playersDiv.style.display = "block";
-    resourcesDiv.style.display = "block";
     jsonButtons.style.display = "flex";
     document.getElementById("openFullPanel").style.display = "block";
 
@@ -120,20 +112,6 @@ function renderServer(data) {
   locEl.textContent = "Location info unavailable.";
 
   serverInfo.style.opacity = "1";
-}
-
-function renderPlayers(players) {
-  playersDiv.innerHTML = `
-    <h3>Players</h3>
-    <p>${players.length} players online</p>
-  `;
-}
-
-function renderResources(resources) {
-  resourcesDiv.innerHTML = `
-    <h3>Resources</h3>
-    <p>${resources.length} resources loaded</p>
-  `;
 }
 
 document.getElementById("playersJson").onclick = () => {
