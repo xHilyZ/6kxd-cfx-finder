@@ -284,12 +284,11 @@ input {
 }
 
 /* JSON OUTPUT */
-.json-output {
+.json-buttons {
+  display: flex;
+  justify-content: center;   /* centers horizontally */
+  gap: 12px;                 /* spacing between buttons */
   margin-top: 20px;
-  padding: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-  border-radius: 10px;
 }
 
 /* OVERLAY */
