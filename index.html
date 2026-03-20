@@ -7,29 +7,72 @@
 </head>
 <body>
 
+  <!-- HEADER -->
+  <header class="header glass">
+    <h2 class="header-title">6kxd CFX Finder</h2>
+    <a href="#" class="discord-btn">Join Discord</a>
+  </header>
+
   <div class="container">
-    <h1 class="title">6kxd CFX Finder</h1>
-    <p class="subtitle">CFX.re Server Lookup Tool</p>
+
+    <!-- SEARCH AREA -->
+    <h1 class="title">CFX.re Server Finder</h1>
+    <p class="subtitle">Get detailed information about any FiveM server instantly</p>
 
     <div class="input-card glass">
-      <input id="cfxInput" type="text" placeholder="Enter CFX code or join link">
+      <input id="cfxInput" type="text" placeholder="Paste CFX link here (e.g., cfx.re/join/xxxx)">
       <button id="analyzeBtn" class="btn-primary">Analyze</button>
     </div>
 
-    <div id="limitBanner" class="limit-banner" style="display:none;">
-      Daily limit reached.
+    <!-- GREETING SCREEN -->
+    <div id="greeting" class="greeting glass">
+      Ready to search. Enter a CFX code above.
     </div>
 
-    <div id="serverInfo" class="info-card glass"></div>
-    <div id="players" class="info-card glass"></div>
-    <div id="resources" class="info-card glass"></div>
+    <!-- SERVER INFO CARD -->
+    <div id="serverInfo" class="server-card glass" style="display:none;">
+      <div class="server-left">
+        <div class="server-icon"></div>
+      </div>
 
-    <div class="json-buttons">
+      <div class="server-right">
+        <h2 id="serverName" class="server-name"></h2>
+        <p id="serverIP"></p>
+
+        <div class="stats-grid">
+          <div class="stat-box glass">
+            <h4>Players</h4>
+            <p id="statPlayers"></p>
+          </div>
+          <div class="stat-box glass">
+            <h4>Resources</h4>
+            <p id="statResources"></p>
+          </div>
+          <div class="stat-box glass">
+            <h4>Build</h4>
+            <p id="statBuild"></p>
+          </div>
+          <div class="stat-box glass">
+            <h4>Locale</h4>
+            <p id="statLocale"></p>
+          </div>
+        </div>
+
+        <p id="serverDesc" class="server-desc"></p>
+        <p id="serverLoc" class="server-loc"></p>
+      </div>
+    </div>
+
+    <!-- SUMMARY SECTIONS -->
+    <div id="players" class="info-card glass" style="display:none;"></div>
+    <div id="resources" class="info-card glass" style="display:none;"></div>
+
+    <div class="json-buttons" id="jsonButtons" style="display:none;">
       <button id="playersJson" class="btn-secondary">Players JSON</button>
       <button id="infoJson" class="btn-secondary">Server Info JSON</button>
     </div>
 
-    <button id="openFullPanel" class="btn-primary full-btn">
+    <button id="openFullPanel" class="btn-primary full-btn" style="display:none;">
       View Full Player & Resource Lists
     </button>
 

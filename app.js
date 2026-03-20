@@ -4,6 +4,8 @@ const serverInfo = document.getElementById("serverInfo");
 const playersDiv = document.getElementById("players");
 const resourcesDiv = document.getElementById("resources");
 const jsonOutput = document.getElementById("jsonOutput");
+const jsonButtons = document.getElementById("jsonButtons");
+const greeting = document.getElementById("greeting");
 const limitBanner = document.getElementById("limitBanner");
 
 let lookupCount = 0;
@@ -36,9 +38,15 @@ async function analyze() {
 
   const code = normalize(raw);
 
+  greeting.style.display = "none";
+
+  serverInfo.style.display = "block";
   serverInfo.innerHTML = "Loading...";
-  playersDiv.innerHTML = "";
-  resourcesDiv.innerHTML = "";
+
+  playersDiv.style.display = "none";
+  resourcesDiv.style.display = "none";
+  jsonButtons.style.display = "none";
+  document.getElementById("openFullPanel").style.display = "none";
   jsonOutput.style.display = "none";
 
   try {
@@ -48,6 +56,12 @@ async function analyze() {
     renderServer(data);
     renderPlayers(data.Data.players);
     renderResources(data.Data.resources);
+
+    playersDiv.style.display = "block";
+    resourcesDiv.style.display = "block";
+    jsonButtons.style.display = "flex";
+    document.getElementById("openFullPanel").style.display = "block";
+
   } catch (err) {
     serverInfo.innerHTML = "Failed to fetch server data.";
   }
@@ -56,15 +70,16 @@ async function analyze() {
 function renderServer(data) {
   const d = data.Data;
 
-  serverInfo.innerHTML = `
-    <h3>${d.hostname}</h3>
-    <p><strong>IP:</strong> ${d.connectEndPoints?.[0] || "Unknown"}</p>
-    <p><strong>Players:</strong> ${d.clients} / ${d.sv_maxclients}</p>
-    <p><strong>Resources:</strong> ${d.resources.length} assets</p>
-    <p><strong>Game Build:</strong> ${d.vars?.sv_enforceGameBuild || "Unknown"}</p>
-    <p><strong>Locale:</strong> ${d.locale || "Unknown"}</p>
-    <p><strong>Description:</strong> ${d.vars?.sv_projectDesc || "No description"}</p>
-  `;
+  document.getElementById("serverName").textContent = d.hostname;
+  document.getElementById("serverIP").textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+
+  document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
+  document.getElementById("statResources").textContent = d.resources.length;
+  document.getElementById("statBuild").textContent = d.vars?.sv_enforceGameBuild || "Unknown";
+  document.getElementById("statLocale").textContent = d.locale || "Unknown";
+
+  document.getElementById("serverDesc").textContent = d.vars?.sv_projectDesc || "No description";
+  document.getElementById("serverLoc").textContent = "Location info unavailable.";
 }
 
 function renderPlayers(players) {
