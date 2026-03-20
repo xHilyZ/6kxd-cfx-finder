@@ -9,12 +9,12 @@ const greeting = document.getElementById("greeting");
 
 let lastData = null;
 
-// REMOVE FIVEM COLOR CODES (^1 ^2 ^3 etc)
+// Remove FiveM color codes (^1 ^2 ^3 etc)
 function cleanName(name) {
   return name.replace(/\^[0-9]/g, "");
 }
 
-// ESCAPE HTML (fixes <3 and other breaking characters)
+// Escape HTML to prevent <3 and < > breaking DOM
 function escapeHTML(str) {
   return str.replace(/[&<>"']/g, m => ({
     '&': '&amp;',
@@ -77,16 +77,30 @@ async function analyze() {
 function renderServer(data) {
   const d = data.Data;
 
-  document.getElementById("serverName").textContent = escapeHTML(cleanName(d.hostname));
-  document.getElementById("serverIP").textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+  const nameEl = document.getElementById("serverName");
+  const ipEl = document.getElementById("serverIP");
+  const playersEl = document.getElementById("statPlayers");
+  const resourcesEl = document.getElementById("statResources");
+  const buildEl = document.getElementById("statBuild");
+  const localeEl = document.getElementById("statLocale");
+  const descEl = document.getElementById("serverDesc");
+  const locEl = document.getElementById("serverLoc");
 
-  document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
-  document.getElementById("statResources").textContent = d.resources.length;
-  document.getElementById("statBuild").textContent = d.vars?.sv_enforceGameBuild || "Unknown";
-  document.getElementById("statLocale").textContent = d.locale || "Unknown";
+  if (!nameEl || !ipEl || !playersEl || !resourcesEl || !buildEl || !localeEl || !descEl || !locEl) {
+    console.error("Missing HTML elements — check your IDs");
+    return;
+  }
 
-  document.getElementById("serverDesc").textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
-  document.getElementById("serverLoc").textContent = "Location info unavailable.";
+  nameEl.textContent = escapeHTML(cleanName(d.hostname));
+  ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+
+  playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
+  resourcesEl.textContent = d.resources.length;
+  buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
+  localeEl.textContent = d.locale || "Unknown";
+
+  descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
+  locEl.textContent = "Location info unavailable.";
 }
 
 function renderPlayers(players) {
