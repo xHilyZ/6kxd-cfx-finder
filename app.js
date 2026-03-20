@@ -1,213 +1,412 @@
-// ===============================
-// GLOBALS
-// ===============================
-let lastServer = null;
-let recentLookups = JSON.parse(localStorage.getItem("recentLookups") || "[]");
+/* ============================
+   ELEMENT REFERENCES
+============================ */
+const input = document.getElementById("cfxInput");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const serverInfo = document.getElementById("serverInfo");
+const jsonOutput = document.getElementById("jsonOutput");
+const jsonButtons = document.getElementById("jsonButtons");
+const greeting = document.getElementById("greeting");
 
-// ===============================
-// MAIN FETCH FUNCTION
-// ===============================
-async function fetchServer(code) {
-    if (!code) return;
+const recentLookups = document.getElementById("recentLookups");
+const recentList = document.getElementById("recentList");
+const clearRecent = document.getElementById("clearRecent");
 
-    try {
-        const res = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${code}`);
-        const data = await res.json();
+const autoRefreshSelect = document.getElementById("autoRefreshSelect");
+const lastRefresh = document.getElementById("lastRefresh");
 
-        if (!data || !data.data) {
-            showError("Server not found.");
-            return;
-        }
+const serverStatusDot = document.getElementById("serverStatusDot");
+const serverStatusText = document.getElementById("serverStatusText");
 
-        lastServer = data;
+const serverBannerWrap = document.getElementById("serverBannerWrap");
+const serverBanner = document.getElementById("serverBanner");
 
-        updateStats(data);
-        updateDescription(data);
-        updateLocation(data);
-        updateControlCenter(data); // ⭐ NEW FEATURE
-        updateRecent(code);
+const pingHeatmap = document.getElementById("pingHeatmap");
 
-        loadPlayers(data);
-        loadResources(data);
-        loadPingHeatmap(data);
+let lastData = null;
+let lastCode = null;
+let refreshInterval = null;
 
-    } catch (err) {
-        console.error(err);
-        showError("Failed to fetch server.");
-    }
+/* ============================
+   UTILITY FUNCTIONS
+============================ */
+
+// Remove FiveM color codes (^1 ^2 ^3 etc)
+function cleanName(name) {
+  return name.replace(/\^[0-9]/g, "");
 }
 
-// ===============================
-// UPDATE STATS
-// ===============================
-function updateStats(data) {
-    document.getElementById("statPlayers").textContent =
-        `${data.data.clients} / ${data.data.sv_maxclients}`;
-
-    document.getElementById("statResources").textContent =
-        data.data.resources?.length || 0;
-
-    document.getElementById("statBuild").textContent =
-        data.data.vars?.sv_enforceGameBuild || "Unknown";
-
-    document.getElementById("statLocale").textContent =
-        data.data.vars?.locale || "Unknown";
+// Escape HTML to prevent <3 and < > breaking DOM
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[m]);
 }
 
-// ===============================
-// UPDATE DESCRIPTION
-// ===============================
-function updateDescription(data) {
-    document.getElementById("serverDesc").textContent =
-        data.data.vars?.sv_projectDesc || "";
+// Advanced auto-detect: CFX code anywhere in string
+function extractCFX(input) {
+  const urlMatch = input.match(/cfx\.re\/join\/([A-Za-z0-9]{6,8})/);
+  if (urlMatch) return urlMatch[1];
+
+  const codeMatch = input.match(/([A-Za-z0-9]{6,8})/);
+  if (codeMatch) return codeMatch[1];
+
+  return null;
 }
 
-// ===============================
-// UPDATE LOCATION (GeoIP)
-// ===============================
-function updateLocation(data) {
-    const loc = data.data.vars?.locale || "Unknown";
-    document.getElementById("serverLoc").textContent = `Locale: ${loc}`;
+// Save recent lookups
+function saveRecent(code) {
+  let list = JSON.parse(localStorage.getItem("recentLookups") || "[]");
+
+  list = list.filter(c => c !== code);
+  list.unshift(code);
+
+  if (list.length > 10) list.pop();
+
+  localStorage.setItem("recentLookups", JSON.stringify(list));
+  renderRecent();
 }
 
-// ===============================
-// ⭐ CONTROL CENTER LOGIC
-// ===============================
-function updateControlCenter(data) {
-    const ip = data?.data?.connectEndPoints?.[0] || null;
-    const cfx = data?.code || null;
-    const discord = data?.data?.vars?.Discord || null;
-    const website = data?.data?.vars?.Website || null;
-
-    // Copy IP
-    const btnIP = document.getElementById("copyIP");
-    btnIP.onclick = () => ip && navigator.clipboard.writeText(ip);
-    btnIP.style.display = ip ? "block" : "none";
-
-    // Copy CFX
-    const btnCFX = document.getElementById("copyCFX");
-    btnCFX.onclick = () => cfx && navigator.clipboard.writeText(cfx);
-
-    // Open in FiveM
-    const btnFiveM = document.getElementById("openFiveM");
-    btnFiveM.onclick = () => ip && (window.location.href = `fivem://connect/${ip}`);
-    btnFiveM.style.display = ip ? "block" : "none";
-
-    // Discord
-    const btnDiscord = document.getElementById("openDiscord");
-    btnDiscord.onclick = () => discord && window.open(discord, "_blank");
-    btnDiscord.style.display = discord ? "block" : "none";
-
-    // Website
-    const btnWebsite = document.getElementById("openWebsite");
-    btnWebsite.onclick = () => website && window.open(website, "_blank");
-    btnWebsite.style.display = website ? "block" : "none";
-}
-
-// ===============================
-// RECENT LOOKUPS
-// ===============================
-function updateRecent(code) {
-    if (!recentLookups.includes(code)) {
-        recentLookups.unshift(code);
-        if (recentLookups.length > 8) recentLookups.pop();
-        localStorage.setItem("recentLookups", JSON.stringify(recentLookups));
-    }
-    renderRecent();
-}
-
+// Render recent lookups
 function renderRecent() {
-    const container = document.getElementById("recentList");
-    if (!container) return;
+  let list = JSON.parse(localStorage.getItem("recentLookups") || "[]");
 
-    container.innerHTML = "";
-    recentLookups.forEach(code => {
-        const item = document.createElement("div");
-        item.className = "recent-item";
-        item.textContent = code;
-        item.onclick = () => fetchServer(code);
-        container.appendChild(item);
-    });
+  if (list.length === 0) {
+    recentLookups.style.display = "none";
+    return;
+  }
+
+  recentLookups.style.display = "block";
+  recentList.innerHTML = "";
+
+  list.forEach(code => {
+    const div = document.createElement("div");
+    div.className = "recent-item";
+    div.textContent = code;
+    div.onclick = () => {
+      input.value = code;
+      analyze();
+    };
+    recentList.appendChild(div);
+  });
 }
 
-// ===============================
-// PLAYERS PANEL
-// ===============================
-function loadPlayers(data) {
-    const list = document.getElementById("fullPlayersList");
-    if (!list) return;
+// Update server status indicator
+function updateStatus(ms, success = true) {
+  if (!success) {
+    serverStatusDot.style.background = "#ef4444";
+    serverStatusText.textContent = "Offline";
+    serverStatusText.style.color = "#ef4444";
+    return;
+  }
 
-    list.innerHTML = "";
-
-    (data.data.players || []).forEach(p => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-            <span class="player-id">${p.id}</span>
-            <span class="player-name">${p.name}</span>
-            <span class="player-ping ${pingClass(p.ping)}">${p.ping}ms</span>
-        `;
-        list.appendChild(li);
-    });
+  if (ms > 5000) {
+    serverStatusDot.style.background = "#ef4444";
+    serverStatusText.textContent = "Offline";
+    serverStatusText.style.color = "#ef4444";
+  } else if (ms > 1500) {
+    serverStatusDot.style.background = "#facc15";
+    serverStatusText.textContent = "Slow";
+    serverStatusText.style.color = "#facc15";
+  } else {
+    serverStatusDot.style.background = "#4ade80";
+    serverStatusText.textContent = "Online";
+    serverStatusText.style.color = "#4ade80";
+  }
 }
 
-function pingClass(ping) {
-    if (ping < 80) return "ping-good";
-    if (ping < 150) return "ping-mid";
-    return "ping-bad";
+// GeoIP lookup
+async function fetchGeoIP(ip) {
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await res.json();
+    return `${data.country_name || "Unknown"} ${data.country ? "🇦🇺" : ""}`;
+  } catch {
+    return "Unknown";
+  }
 }
 
-// ===============================
-// RESOURCES PANEL
-// ===============================
-function loadResources(data) {
-    const list = document.getElementById("fullResourcesList");
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    (data.data.resources || []).forEach(r => {
-        const li = document.createElement("li");
-        li.textContent = r;
-        list.appendChild(li);
-    });
+/* ============================
+   FETCH SERVER DATA
+============================ */
+async function fetchServer(code) {
+  const url = `${window.location.origin}/api/resolve?code=${code}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Invalid CFX code");
+  return res.json();
 }
 
-// ===============================
-// PING HEATMAP
-// ===============================
-function loadPingHeatmap(data) {
-    const heatmap = document.getElementById("pingHeatmap");
-    if (!heatmap) return;
+/* ============================
+   MAIN ANALYZE FUNCTION
+============================ */
+async function analyze(isAuto = false) {
+  const raw = input.value.trim();
+  if (!raw && !isAuto) return alert("Enter a CFX code");
 
-    heatmap.innerHTML = "";
+  const code = isAuto ? lastCode : extractCFX(raw);
+  if (!code && !isAuto) return alert("Invalid CFX link or code.");
 
-    (data.data.players || []).forEach(p => {
-        const row = document.createElement("div");
-        row.className = "heatmap-row";
+  lastCode = code;
+  saveRecent(code);
 
-        row.innerHTML = `
-            <div class="heatmap-label">${p.name}</div>
-            <div class="heatmap-bar" style="width:${Math.min(p.ping, 300)}px"></div>
-        `;
+  greeting.style.display = "none";
+  serverInfo.style.display = "block";
 
-        heatmap.appendChild(row);
-    });
+  serverInfo.style.opacity = "0.4";
+  document.getElementById("serverName").textContent = "Loading...";
+  document.getElementById("serverIP").textContent = "";
+  document.getElementById("statPlayers").textContent = "";
+  document.getElementById("statResources").textContent = "";
+  document.getElementById("statBuild").textContent = "";
+  document.getElementById("statLocale").textContent = "";
+  document.getElementById("serverDesc").textContent = "";
+  document.getElementById("serverLoc").textContent = "";
+  document.getElementById("serverCountry").textContent = "";
+
+  jsonButtons.style.display = "none";
+  document.getElementById("openFullPanel").style.display = "none";
+  jsonOutput.style.display = "none";
+
+  const startTime = performance.now();
+
+  try {
+    const data = await fetchServer(code);
+    lastData = data;
+
+    const endTime = performance.now();
+    updateStatus(endTime - startTime, true);
+
+    renderServer(data);
+    renderHeatmap(data.Data.players);
+
+    jsonButtons.style.display = "flex";
+    document.getElementById("openFullPanel").style.display = "block";
+
+    lastRefresh.textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+
+  } catch (err) {
+    updateStatus(0, false);
+    document.getElementById("serverName").textContent = "Failed to fetch server data.";
+  }
 }
 
-// ===============================
-// ERROR HANDLING
-// ===============================
-function showError(msg) {
-    document.getElementById("serverDesc").textContent = msg;
+/* ============================
+   RENDER SERVER INFO
+============================ */
+async function renderServer(data) {
+  const d = data.Data;
+
+  const nameEl = document.getElementById("serverName");
+  const ipEl = document.getElementById("serverIP");
+  const playersEl = document.getElementById("statPlayers");
+  const resourcesEl = document.getElementById("statResources");
+  const buildEl = document.getElementById("statBuild");
+  const localeEl = document.getElementById("statLocale");
+  const descEl = document.getElementById("serverDesc");
+  const locEl = document.getElementById("serverLoc");
+  const countryEl = document.getElementById("serverCountry");
+
+  // Icon
+  const iconEl = document.querySelector(".server-icon");
+  const iconUrl = `https://servers-frontend.fivem.net/api/servers/icon/${data.EndPoint}.png`;
+  iconEl.style.backgroundImage = `url(${iconUrl})`;
+
+  // Banner
+  if (d.vars?.banner_detail) {
+    serverBanner.src = d.vars.banner_detail;
+    serverBannerWrap.style.display = "block";
+  } else {
+    serverBannerWrap.style.display = "none";
+  }
+
+  nameEl.textContent = escapeHTML(cleanName(d.hostname));
+  ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+
+  playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
+  resourcesEl.textContent = d.resources.length;
+  buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
+  localeEl.textContent = d.locale || "Unknown";
+
+  descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
+  locEl.textContent = "Location info unavailable.";
+
+  // GeoIP
+  const ip = d.connectEndPoints?.[0]?.split(":")[0];
+  if (ip) {
+    countryEl.textContent = await fetchGeoIP(ip);
+  }
+
+  serverInfo.style.opacity = "1";
 }
 
-// ===============================
-// SEARCH HANDLER
-// ===============================
-document.getElementById("lookupBtn").onclick = () => {
-    const code = document.getElementById("serverInput").value.trim();
-    fetchServer(code);
+/* ============================
+   HEATMAP
+============================ */
+function renderHeatmap(players) {
+  if (!players || players.length === 0) {
+    pingHeatmap.style.display = "none";
+    return;
+  }
+
+  pingHeatmap.style.display = "block";
+  pingHeatmap.innerHTML = "";
+
+  const ranges = {
+    "0–50ms": players.filter(p => p.ping <= 50).length,
+    "50–100ms": players.filter(p => p.ping > 50 && p.ping <= 100).length,
+    "100–150ms": players.filter(p => p.ping > 100 && p.ping <= 150).length,
+    "150ms+": players.filter(p => p.ping > 150).length
+  };
+
+  const max = Math.max(...Object.values(ranges));
+
+  for (const [label, count] of Object.entries(ranges)) {
+    const row = document.createElement("div");
+    row.className = "heatmap-row";
+
+    const lbl = document.createElement("div");
+    lbl.className = "heatmap-label";
+    lbl.textContent = label;
+
+    const bar = document.createElement("div");
+    bar.className = "heatmap-bar";
+    bar.style.width = `${(count / max) * 100}%`;
+
+    row.appendChild(lbl);
+    row.appendChild(bar);
+    pingHeatmap.appendChild(row);
+  }
+}
+
+/* ============================
+   JSON BUTTONS
+============================ */
+document.getElementById("playersJson").onclick = () => {
+  jsonOutput.style.display = "block";
+  jsonOutput.textContent = JSON.stringify(lastData?.Data?.players || {}, null, 2);
 };
 
-// Load recent on startup
+document.getElementById("infoJson").onclick = () => {
+  jsonOutput.style.display = "block";
+  jsonOutput.textContent = JSON.stringify(lastData?.Data || {}, null, 2);
+};
+
+/* ============================
+   FULL PANEL LOGIC
+============================ */
+const fullPanel = document.getElementById("fullPanel");
+const overlay = document.getElementById("overlay");
+const openFullPanel = document.getElementById("openFullPanel");
+const closePanel = document.getElementById("closePanel");
+const fullPlayers = document.getElementById("fullPlayers");
+const fullResources = document.getElementById("fullResources");
+
+openFullPanel.onclick = () => {
+  if (!lastData) return alert("Run a lookup first.");
+
+  const d = lastData.Data;
+
+  renderFullPlayers(d.players);
+  renderFullResources(d.resources);
+
+  fullPanel.classList.add("open");
+  overlay.classList.add("show");
+};
+
+closePanel.onclick = () => {
+  fullPanel.classList.remove("open");
+  overlay.classList.remove("show");
+};
+
+overlay.onclick = () => {
+  fullPanel.classList.remove("open");
+  overlay.classList.remove("show");
+};
+
+/* ============================
+   PLAYER SEARCH
+============================ */
+const playerSearch = document.getElementById("playerSearch");
+
+function renderFullPlayers(players) {
+  let html = "<ul>";
+  players.forEach(p => {
+    let pingClass =
+      p.ping <= 60 ? "ping-good" :
+      p.ping <= 120 ? "ping-mid" :
+      "ping-bad";
+
+    html += `
+      <li>
+        <span class="player-id">[${p.id}]</span>
+        <span class="player-name">${escapeHTML(p.name)}</span>
+        <span class="player-ping ${pingClass}">${p.ping}ms</span>
+      </li>
+    `;
+  });
+  html += "</ul>";
+  fullPlayers.innerHTML = html;
+
+  playerSearch.oninput = () => {
+    const q = playerSearch.value.toLowerCase();
+    const filtered = players.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      String(p.id).includes(q) ||
+      String(p.ping).includes(q)
+    );
+    renderFullPlayers(filtered);
+  };
+}
+
+/* ============================
+   RESOURCE SEARCH + SORT
+============================ */
+const resourceSearch = document.getElementById("resourceSearch");
+const resourceSort = document.getElementById("resourceSort");
+
+function renderFullResources(resources) {
+  let html = "<ul>";
+  resources.forEach(r => {
+    html += `<li>${escapeHTML(r)}</li>`;
+  });
+  html += "</ul>";
+  fullResources.innerHTML = html;
+
+  resourceSearch.oninput = () => {
+    const q = resourceSearch.value.toLowerCase();
+    const filtered = resources.filter(r => r.toLowerCase().includes(q));
+    renderFullResources(filtered);
+  };
+
+  resourceSort.onclick = () => {
+    const sorted = [...resources].sort();
+    renderFullResources(sorted);
+  };
+}
+
+/* ============================
+   AUTO REFRESH
+============================ */
+autoRefreshSelect.onchange = () => {
+  if (refreshInterval) clearInterval(refreshInterval);
+
+  const ms = Number(autoRefreshSelect.value);
+  if (ms === 0) return;
+
+  refreshInterval = setInterval(() => analyze(true), ms);
+};
+
+/* ============================
+   INIT
+============================ */
+clearRecent.onclick = () => {
+  localStorage.removeItem("recentLookups");
+  renderRecent();
+};
+
 renderRecent();
+analyzeBtn.onclick = () => analyze(false);
