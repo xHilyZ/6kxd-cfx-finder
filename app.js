@@ -124,7 +124,16 @@ async function fetchGeoIP(ip) {
   try {
     const res = await fetch(`https://ipapi.co/${ip}/json/`);
     const data = await res.json();
-    return `${data.country_name || "Unknown"} ${data.country ? "🇦🇺" : ""}`;
+
+    const country = data.country_name || "Unknown";
+    const code = data.country || null;
+
+    // Convert ISO country code to emoji flag
+    const flag = code
+      ? String.fromCodePoint(...[...code.toUpperCase()].map(c => 127397 + c.charCodeAt()))
+      : "";
+
+    return `${country} ${flag}`;
   } catch {
     return "Unknown";
   }
@@ -229,7 +238,7 @@ async function renderServer(data) {
   playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
   resourcesEl.textContent = d.resources.length;
   buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
-  localeEl.textContent = d.locale || "Unknown";
+  localeEl.textContent = await fetchGeoIP(ip) || "Unknown";
 
   descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
   locEl.textContent = "Location info unavailable.";
