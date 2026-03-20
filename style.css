@@ -110,3 +110,29 @@ button {
   color: white;
   cursor: pointer;
 }
+
+/* TWO COLUMN GRID */
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.panel-grid h3 {
+  margin-bottom: 10px;
+  color: #a3e635;
+}
+
+#fullPlayers li,
+#fullResources li {
+  padding: 6px 0;
+  border-bottom: 1px solid #1f2933;
+  font-size: 14px;
+}
+
+#fullPlayers ul,
+#fullResources ul {
+  list-style: none;
+  padding-left: 0;
+}

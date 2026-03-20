@@ -68,30 +68,17 @@ function renderServer(data) {
 }
 
 function renderPlayers(players) {
-  if (!players || players.length === 0) {
-    playersDiv.innerHTML = "<p>No players online.</p>";
-    return;
-  }
-
-  let html = "<h3>Players</h3><ul>";
-  players.forEach(p => {
-    html += `<li>${p.name} (${p.id}) - ${p.ping}ms</li>`;
-  });
-  html += "</ul>";
-
-  playersDiv.innerHTML = html;
+  playersDiv.innerHTML = `
+    <h3>Players</h3>
+    <p>${players.length} players online</p>
+  `;
 }
 
 function renderResources(resources) {
-  if (!resources) return;
-
-  let html = "<h3>Resources</h3><ul>";
-  resources.forEach(r => {
-    html += `<li>${r}</li>`;
-  });
-  html += "</ul>";
-
-  resourcesDiv.innerHTML = html;
+  resourcesDiv.innerHTML = `
+    <h3>Resources</h3>
+    <p>${resources.length} resources loaded</p>
+  `;
 }
 
 document.getElementById("playersJson").onclick = () => {
@@ -120,7 +107,7 @@ openFullPanel.onclick = () => {
 
   let pHtml = "<ul>";
   d.players.forEach(p => {
-    pHtml += `<li>${p.name} (${p.id}) - ${p.ping}ms</li>`;
+    pHtml += `<li>[${p.id}] ${p.name} — ${p.ping}ms</li>`;
   });
   pHtml += "</ul>";
   fullPlayers.innerHTML = pHtml;
