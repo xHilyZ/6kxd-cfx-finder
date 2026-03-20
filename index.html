@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>6kxd CFX Finder</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>6kxd CFX Finder</h1>
+    <p class="subtitle">Cfx.re Server Finder</p>
+
+    <div class="input-row">
+      <input id="cfxInput" type="text" placeholder="Enter CFX code or join link">
+      <button id="analyzeBtn">Analyze</button>
+    </div>
+
+    <div id="limitBanner" class="limit-banner" style="display:none;">
+      Daily limit reached.
+    </div>
+
+    <div id="serverInfo" class="section"></div>
+    <div id="players" class="section"></div>
+    <div id="resources" class="section"></div>
+
+    <div class="json-buttons">
+      <button id="playersJson">Players JSON</button>
+      <button id="infoJson">Server Info JSON</button>
+    </div>
+
+    <pre id="jsonOutput" class="json-output" style="display:none;"></pre>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
