@@ -284,7 +284,7 @@ async function analyzeCFX() {
     }
 
     const data = await res.json();
-        if (!data || !data.Data) {
+    if (!data || !data.Data) {
       setStatus("offline", "Invalid or private server");
       setLoadingState(false);
       return;
@@ -352,3 +352,187 @@ async function analyzeCFX() {
     setLoadingState(false);
   }
 }
+
+// ===============================
+// MODAL RENDER + SEARCH
+// ===============================
+
+function renderFullPanel() {
+  const pSearch = fullPlayerSearch.value.toLowerCase();
+  const rSearch = fullResourceSearch.value.toLowerCase();
+
+  // Players
+  fullPlayersList.innerHTML = "";
+  currentPlayers
+    .filter(p =>
+      (p.name || "").toLowerCase().includes(pSearch) ||
+      String(p.id).includes(pSearch)
+    )
+    .forEach(p => {
+      const div = document.createElement("div");
+      div.className = "player-row";
+      div.innerHTML = `
+        <div class="player-avatar">${p.name ? p.name[0].toUpperCase() : "?"}</div>
+        <div class="player-info">
+          <div class="player-name">${p.name}</div>
+          <div class="player-meta">ID ${p.id} • ${p.ping}ms</div>
+        </div>
+      `;
+      fullPlayersList.appendChild(div);
+    });
+
+  // Resources
+  fullResourcesList.innerHTML = "";
+  currentResources
+    .filter(r => r.toLowerCase().includes(rSearch))
+    .forEach(r => {
+      const li = document.createElement("div");
+      li.className = "player-row";
+      li.textContent = r;
+      fullResourcesList.appendChild(li);
+    });
+}
+
+openFullPanel.addEventListener("click", () => {
+  renderFullPanel();
+  fullPanelOverlay.classList.add("visible");
+});
+
+closeFullPanel.addEventListener("click", () => {
+  fullPanelOverlay.classList.remove("visible");
+});
+
+fullPlayerSearch.addEventListener("input", renderFullPanel);
+fullResourceSearch.addEventListener("input", renderFullPanel);
+
+// ===============================
+// GLOBAL SERVER BROWSER
+// ===============================
+
+async function loadGlobalServers() {
+  browserTableBody.innerHTML = `
+    <tr><td colspan="5" class="muted">Loading…</td></tr>
+  `;
+
+  try {
+    const res = await fetch("/api/servers");
+    if (!res.ok) {
+      browserTableBody.innerHTML = `
+        <tr><td colspan="5" class="muted">Failed to load servers.</td></tr>
+      `;
+      return;
+    }
+
+    const list = await res.json();
+    renderBrowserTable(list);
+
+  } catch (err) {
+    browserTableBody.innerHTML = `
+      <tr><td colspan="5" class="muted">Error loading servers.</td></tr>
+    `;
+  }
+}
+
+function renderBrowserTable(list) {
+  const search = browserSearch.value.toLowerCase();
+
+  const filtered = list.filter(s =>
+    s.hostname.toLowerCase().includes(search) ||
+    (s.vars?.tags || "").toLowerCase().includes(search) ||
+    (s.vars?.locale || "").toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    browserTableBody.innerHTML = `
+      <tr><td colspan="5" class="muted">No servers match your search.</td></tr>
+    `;
+    return;
+  }
+
+  browserTableBody.innerHTML = "";
+
+  filtered.forEach(s => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${s.hostname}</td>
+      <td>${s.players?.length || 0}</td>
+      <td>${s.vars?.locale || "—"}</td>
+      <td>${s.vars?.tags || "—"}</td>
+      <td><button class="outline-btn small-btn" data-code="${s.joinId}">Join</button></td>
+    `;
+
+    tr.querySelector("button").onclick = () => {
+      window.open(`https://cfx.re/join/${s.joinId}`, "_blank");
+    };
+
+    browserTableBody.appendChild(tr);
+  });
+}
+
+browserRefresh.addEventListener("click", loadGlobalServers);
+
+browserSearch.addEventListener("input", () => {
+  if (browserTableBody.children.length > 0) {
+    loadGlobalServers();
+  }
+});
+
+// ===============================
+// SIDEBAR NAVIGATION
+// ===============================
+
+function switchView(view) {
+  sidebarItems.forEach(i => i.classList.remove("active"));
+  views.forEach(v => v.classList.remove("active"));
+
+  document.querySelector(`[data-view="${view}"]`).classList.add("active");
+  document.getElementById(`view-${view}`).classList.add("active");
+}
+
+sidebarItems.forEach(item => {
+  item.addEventListener("click", () => {
+    const view = item.dataset.view;
+    switchView(view);
+
+    if (view === "browser") loadGlobalServers();
+    if (view === "favorites") renderFavorites();
+    if (view === "history") renderHistory();
+  });
+});
+
+// ===============================
+// THEME
+// ===============================
+
+function initTheme() {
+  const saved = localStorage.getItem("cfxTheme");
+  if (saved === "light") {
+    document.body.classList.add("light");
+    themeToggle.textContent = "Light";
+  } else {
+    document.body.classList.remove("light");
+    themeToggle.textContent = "Dark";
+  }
+}
+
+themeToggle.addEventListener("click", () => {
+  const isLight = document.body.classList.toggle("light");
+  localStorage.setItem("cfxTheme", isLight ? "light" : "dark");
+  themeToggle.textContent = isLight ? "Light" : "Dark";
+});
+
+// ===============================
+// INIT
+// ===============================
+
+analyzeBtn.addEventListener("click", analyzeCFX);
+
+cfxInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") analyzeCFX();
+});
+
+initTheme();
+renderHistory();
+renderFavorites();
+setTopStatus("idle", "Idle");
