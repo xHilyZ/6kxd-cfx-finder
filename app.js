@@ -5,9 +5,6 @@ let fullPlayers = [];
 let fullResources = [];
 let sortAZ = false;
 
-let allServers = []; // cached AU/NZ servers
-let serversLoaded = false; // load only once
-
 // ===============================
 // STATUS BAR
 // ===============================
@@ -142,44 +139,17 @@ document.getElementById("resourceSort").addEventListener("click", () => {
 });
 
 // ===============================
-// GLOBAL SERVER SEARCH (AU + NZ)
+// GLOBAL SERVER SEARCH (AU ONLY)
 // ===============================
 const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
 const serverResults = document.getElementById("serverResults");
 
-// Load full server list ONLY when typing starts
-async function loadServersIfNeeded() {
-  if (serversLoaded) return;
-
-  try {
-    const res = await fetch("https://servers-frontend.fivem.net/api/servers/");
-    const json = await res.json();
-
-    // Filter AU + NZ by IP ranges
-    allServers = json.filter(s => {
-      const endpoints = s.Data?.connectEndPoints || [];
-
-      return endpoints.some(ip =>
-        ip.startsWith("139.99.") ||   // AU
-        ip.startsWith("103.212.") ||  // AU
-        ip.startsWith("51.79.") ||    // AU
-        ip.startsWith("54.206.") ||   // AU
-        ip.startsWith("43.229.") ||   // AU
-        ip.startsWith("103.1.") ||    // AU
-        ip.startsWith("45.248.") ||   // AU
-        ip.startsWith("103.254.") ||  // NZ
-        ip.startsWith("103.16.") ||   // NZ
-        ip.startsWith("103.26.") ||   // NZ
-        ip.startsWith("103.50.")      // NZ
-      );
-    });
-
-    serversLoaded = true;
-  } catch (err) {
-    console.error("Failed to load server list", err);
-  }
-}
+// AU IP ranges
+const AU_IPS = [
+  "139.99.", "103.212.", "51.79.", "54.206.",
+  "43.229.", "103.1.", "45.248."
+];
 
 // Live search
 globalInput.addEventListener("input", async () => {
@@ -190,30 +160,38 @@ globalInput.addEventListener("input", async () => {
     return;
   }
 
-  await loadServersIfNeeded();
+  try {
+    const res = await fetch(`https://servers-frontend.fivem.net/api/servers/search?q=${term}`);
+    const json = await res.json();
 
-  const matches = allServers.filter(s =>
-    s.Data?.hostname?.toLowerCase().includes(term)
-  );
+    // Filter AU-only by IP
+    const matches = json.filter(s => {
+      const endpoints = s.Data?.connectEndPoints || [];
+      return endpoints.some(ip => AU_IPS.some(prefix => ip.startsWith(prefix)));
+    });
 
-  serverResults.innerHTML = "";
+    serverResults.innerHTML = "";
 
-  matches.slice(0, 25).forEach(s => {
-    const icon = s.Data.icon || "";
-    const name = s.Data.hostname || "Unknown";
-    const players = s.Data.players?.length || 0;
-    const code = s.EndPoint;
+    matches.slice(0, 25).forEach(s => {
+      const icon = s.Data.icon || "";
+      const name = s.Data.hostname || "Unknown";
+      const players = s.Data.players?.length || 0;
+      const code = s.EndPoint;
 
-    serverResults.innerHTML += `
-      <div class="server-row" data-code="${code}">
-        <div class="server-row-icon" style="background-image:url('${icon}')"></div>
-        <div class="server-row-name">${name}</div>
-        <div class="server-row-players">${players} players</div>
-      </div>
-    `;
-  });
+      serverResults.innerHTML += `
+        <div class="server-row" data-code="${code}">
+          <div class="server-row-icon" style="background-image:url('${icon}')"></div>
+          <div class="server-row-name">${name}</div>
+          <div class="server-row-players">${players} players</div>
+        </div>
+      `;
+    });
 
-  serverBrowser.style.display = "block";
+    serverBrowser.style.display = "block";
+
+  } catch (err) {
+    console.error("Search failed", err);
+  }
 });
 
 // Click → load server
