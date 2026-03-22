@@ -1,7 +1,12 @@
 export default async function handler(req, res) {
   try {
-    const { code } = req.query;
-    if (!code) {
+    // --- FIXED PARAM HANDLING ---
+    const code =
+      req.query.code ||
+      req.query["code"] ||
+      req.url.split("/").pop();
+
+    if (!code || code.includes("server")) {
       return res.status(400).json({ error: "Missing server code" });
     }
 
