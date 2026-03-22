@@ -14,6 +14,18 @@
 
   <div class="container">
 
+    <!-- AUTO REFRESH (REQUIRED FOR JS TO WORK) -->
+    <div class="auto-refresh glass">
+      <label for="autoRefreshSelect">Auto-refresh:</label>
+      <select id="autoRefreshSelect">
+        <option value="0">Off</option>
+        <option value="10000">Every 10s</option>
+        <option value="30000">Every 30s</option>
+        <option value="60000">Every 60s</option>
+      </select>
+      <span id="lastRefresh" class="last-refresh"></span>
+    </div>
+
     <!-- SERVER INFO CARD -->
     <div id="serverInfo" class="server-card glass">
       <div class="server-left">
@@ -68,6 +80,7 @@
       <button id="infoJson" class="btn-secondary">Server Info JSON</button>
     </div>
 
+    <!-- FULL PANEL BUTTON -->
     <button id="openFullPanel" class="btn-primary full-btn">
       View Full Player & Resource Lists
     </button>
@@ -87,18 +100,22 @@
 
       <div class="panel-grid">
 
+        <!-- PLAYERS PANEL -->
         <div>
           <h3 class="panel-heading">Online Players</h3>
           <input id="playerSearch" class="panel-search" type="text" placeholder="Search players">
           <div id="fullPlayers"></div>
         </div>
 
+        <!-- RESOURCES PANEL -->
         <div>
           <h3 class="panel-heading">Resources List</h3>
+
           <div class="resource-controls">
             <input id="resourceSearch" class="panel-search" type="text" placeholder="Search resources">
             <button id="resourceSort" class="btn-secondary small">Sort A–Z</button>
           </div>
+
           <div id="fullResources"></div>
         </div>
 
