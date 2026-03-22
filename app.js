@@ -89,61 +89,10 @@ document.getElementById("closePanel").addEventListener("click", () => {
 });
 
 // ===============================
-// SEARCH FILTERS
+// SERVER NAME SEARCH (AU ONLY)
 // ===============================
-document.getElementById("playerSearch").addEventListener("input", e => {
-  const term = e.target.value.toLowerCase();
-  const list = document.getElementById("fullPlayers");
-
-  list.innerHTML = "";
-
-  fullPlayers
-    .filter(p =>
-      p.name.toLowerCase().includes(term) ||
-      String(p.id).includes(term) ||
-      String(p.ping).includes(term)
-    )
-    .forEach(p => {
-      const pingClass =
-        p.ping < 80 ? "ping-good" :
-        p.ping < 150 ? "ping-mid" :
-        "ping-bad";
-
-      list.innerHTML += `
-        <li>
-          <span class="player-id">${p.id}</span>
-          <span class="player-name">${p.name}</span>
-          <span class="player-ping ${pingClass}">${p.ping}ms</span>
-        </li>
-      `;
-    });
-});
-
-document.getElementById("resourceSearch").addEventListener("input", e => {
-  const term = e.target.value.toLowerCase();
-  const list = document.getElementById("fullResources");
-
-  list.innerHTML = "";
-
-  fullResources
-    .filter(r => r.toLowerCase().includes(term))
-    .forEach(r => {
-      list.innerHTML += `<li>${r}</li>`;
-    });
-});
-
-document.getElementById("resourceSort").addEventListener("click", () => {
-  sortAZ = !sortAZ;
-  fullResources.sort((a, b) => sortAZ ? a.localeCompare(b) : b.localeCompare(a));
-  renderResourceChips(fullResources);
-});
-
-// ===============================
-// GLOBAL SERVER SEARCH (AU ONLY)
-// ===============================
-const globalInput = document.getElementById("globalSearchInput");
-const serverBrowser = document.getElementById("serverBrowser");
-const serverResults = document.getElementById("serverResults");
+const nameInput = document.getElementById("globalSearchInput");
+const nameSearchBtn = document.getElementById("globalSearchBtn");
 
 // AU IP ranges
 const AU_IPS = [
@@ -151,67 +100,50 @@ const AU_IPS = [
   "43.229.", "103.1.", "45.248."
 ];
 
-// Live search
-globalInput.addEventListener("input", async () => {
-  const term = globalInput.value.toLowerCase();
+// Search button click
+nameSearchBtn.addEventListener("click", searchServerByName);
 
-  if (term.length < 2) {
-    serverBrowser.style.display = "none";
-    return;
-  }
+// Enter key support
+nameInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") searchServerByName();
+});
+
+async function searchServerByName() {
+  const term = nameInput.value.trim().toLowerCase();
+  if (term.length < 2) return;
+
+  setStatus("loading");
 
   try {
     const res = await fetch(`https://servers-frontend.fivem.net/api/servers/search?q=${term}`);
     const json = await res.json();
 
-    // Filter AU-only by IP
-    const matches = json.filter(s => {
+    // AU-only filter
+    const auServers = json.filter(s => {
       const endpoints = s.Data?.connectEndPoints || [];
       return endpoints.some(ip => AU_IPS.some(prefix => ip.startsWith(prefix)));
     });
 
-    serverResults.innerHTML = "";
+    if (auServers.length === 0) {
+      setStatus("offline");
+      document.getElementById("statusText").textContent = "No AU servers found";
+      return;
+    }
 
-    matches.slice(0, 25).forEach(s => {
-      const icon = s.Data.icon || "";
-      const name = s.Data.hostname || "Unknown";
-      const players = s.Data.players?.length || 0;
-      const code = s.EndPoint;
+    // Pick highest player count
+    const best = auServers.sort((a, b) =>
+      (b.Data.players?.length || 0) - (a.Data.players?.length || 0)
+    )[0];
 
-      serverResults.innerHTML += `
-        <div class="server-row" data-code="${code}">
-          <div class="server-row-icon" style="background-image:url('${icon}')"></div>
-          <div class="server-row-name">${name}</div>
-          <div class="server-row-players">${players} players</div>
-        </div>
-      `;
-    });
-
-    serverBrowser.style.display = "block";
+    // Load server info
+    document.getElementById("cfxInput").value = best.EndPoint;
+    analyzeCFX();
 
   } catch (err) {
     console.error("Search failed", err);
+    setStatus("offline");
   }
-});
-
-// Click → load server
-serverResults.addEventListener("click", e => {
-  const row = e.target.closest(".server-row");
-  if (!row) return;
-
-  const code = row.dataset.code;
-
-  document.getElementById("cfxInput").value = code;
-  serverBrowser.style.display = "none";
-  analyzeCFX();
-});
-
-// Hide when clicking outside
-document.addEventListener("click", e => {
-  if (!serverBrowser.contains(e.target) && e.target !== globalInput) {
-    serverBrowser.style.display = "none";
-  }
-});
+}
 
 // ===============================
 // MAIN FETCH FUNCTION
