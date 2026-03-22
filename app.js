@@ -147,21 +147,19 @@ const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
 const serverResults = document.getElementById("serverResults");
 
-// Load servers using paginated API
+// Load servers using paginated API (3 pages)
 async function loadAllServers() {
   try {
-    const res = await fetch("https://servers-frontend.fivem.net/api/servers/stream/");
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let json = "";
+    let pages = [0, 1, 2]; // Option A: 3 pages
+    let results = [];
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      json += decoder.decode(value);
+    for (let p of pages) {
+      const res = await fetch(`https://servers-frontend.fivem.net/api/servers/page/${p}`);
+      const json = await res.json();
+      results = results.concat(json);
     }
 
-    allServers = JSON.parse(json);
+    allServers = results;
   } catch (err) {
     console.error("Failed to load server list", err);
   }
