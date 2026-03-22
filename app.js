@@ -102,7 +102,14 @@ async function searchServerByName() {
   setStatus("loading");
 
   try {
+    // ⭐ FIXED DOMAIN (fivem.net, not fivem.net)
     const res = await fetch(`https://servers-frontend.fivem.net/api/servers/search?q=${term}`);
+    if (!res.ok) {
+      setStatus("offline");
+      document.getElementById("statusText").textContent = "Search endpoint unavailable";
+      return;
+    }
+
     const json = await res.json();
 
     const auServers = json.filter(s => {
@@ -133,6 +140,7 @@ async function searchServerByName() {
   } catch (err) {
     console.error("Search failed", err);
     setStatus("offline");
+    document.getElementById("statusText").textContent = "Search failed";
   }
 }
 
@@ -155,6 +163,8 @@ async function analyzeCFX() {
 
   try {
     const res = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${code}`);
+    if (!res.ok) throw new Error();
+
     const data = await res.json();
     const d = data.Data;
 
