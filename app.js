@@ -3,7 +3,9 @@
 ============================================================ */
 
 const isHome = window.location.pathname.includes("index.html") || window.location.pathname === "/";
-const isServer = window.location.pathname.includes("server.html");
+const path = window.location.pathname.toLowerCase();
+const isServer = path.includes("server");
+
 
 /* ============================================================
    HOMEPAGE LOGIC
