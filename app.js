@@ -141,7 +141,7 @@ document.getElementById("resourceSort").addEventListener("click", () => {
 });
 
 // ===============================
-// GLOBAL SERVER SEARCH (AU‑ONLY)
+// GLOBAL SERVER SEARCH (AU + NZ)
 // ===============================
 const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
@@ -180,11 +180,24 @@ globalInput.addEventListener("input", () => {
 
   const matches = allServers.filter(s => {
     const nameMatch = s.Data?.hostname?.toLowerCase().includes(term);
-    const isAU =
-      s.Data?.vars?.country === "AU" ||
-      s.Data?.locale === "en-AU";
 
-    return nameMatch && isAU;
+    const endpoints = s.Data?.connectEndPoints || [];
+
+    const isAUNZ = endpoints.some(ip =>
+      ip.startsWith("139.99.") ||   // AU
+      ip.startsWith("103.212.") ||  // AU
+      ip.startsWith("51.79.") ||    // AU
+      ip.startsWith("54.206.") ||   // AU
+      ip.startsWith("43.229.") ||   // AU
+      ip.startsWith("103.1.") ||    // AU
+      ip.startsWith("45.248.") ||   // AU
+      ip.startsWith("103.254.") ||  // NZ
+      ip.startsWith("103.16.") ||   // NZ
+      ip.startsWith("103.26.") ||   // NZ
+      ip.startsWith("103.50.")      // NZ
+    );
+
+    return nameMatch && isAUNZ;
   });
 
   serverResults.innerHTML = "";
