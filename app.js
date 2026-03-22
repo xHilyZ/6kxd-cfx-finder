@@ -30,6 +30,9 @@ const sidebarItems = document.querySelectorAll(".sidebar-item");
 const views = document.querySelectorAll(".view");
 
 const themeToggle = document.getElementById("themeToggle");
+const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
+const globalSearch = document.getElementById("globalSearch");
 
 // Modal
 const openFullPanel = document.getElementById("openFullPanel");
@@ -41,11 +44,18 @@ const fullResourcesList = document.getElementById("fullResourcesList");
 const fullPlayerSearch = document.getElementById("fullPlayerSearch");
 const fullResourceSearch = document.getElementById("fullResourceSearch");
 
+// Ping graph
+const pingCanvas = document.getElementById("pingGraph");
+const pingCtx = pingCanvas.getContext("2d");
+
 let currentCode = null;
 let currentServerData = null;
 let currentResources = [];
 let currentPlayers = [];
 let favorites = loadFavorites();
+
+let pingHistory = [];
+let pingInterval = null;
 
 // ===============================
 // STATUS + HELPERS
@@ -258,6 +268,82 @@ function renderInfoPanel(d, code) {
 }
 
 // ===============================
+// PING GRAPH
+// ===============================
+
+function resetPingGraph() {
+  pingHistory = [];
+  drawPingGraph();
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+}
+
+function startPingGraph() {
+  resetPingGraph();
+  if (!currentPlayers || !currentPlayers.length) return;
+
+  // Seed with initial average
+  pushPingSample();
+
+  pingInterval = setInterval(() => {
+    pushPingSample();
+    drawPingGraph();
+  }, 3000);
+}
+
+function pushPingSample() {
+  if (!currentPlayers || !currentPlayers.length) return;
+  const avg =
+    currentPlayers.reduce((sum, p) => sum + (p.ping || 0), 0) /
+    currentPlayers.length;
+
+  pingHistory.push(avg);
+  if (pingHistory.length > 30) pingHistory.shift();
+}
+
+function drawPingGraph() {
+  const ctx = pingCtx;
+  const w = pingCanvas.width;
+  const h = pingCanvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+
+  if (!pingHistory.length) {
+    ctx.strokeStyle = "rgba(139,144,165,0.6)";
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    return;
+  }
+
+  const maxPing = Math.max(...pingHistory, 100);
+  const minPing = 0;
+
+  ctx.beginPath();
+  ctx.strokeStyle = "#4da3ff";
+  ctx.lineWidth = 2;
+
+  pingHistory.forEach((val, idx) => {
+    const x = (idx / Math.max(pingHistory.length - 1, 1)) * w;
+    const norm = (val - minPing) / (maxPing - minPing || 1);
+    const y = h - norm * h;
+
+    if (idx === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+
+  ctx.stroke();
+
+  // Glow
+  ctx.strokeStyle = "rgba(77,163,255,0.35)";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+}
+
+// ===============================
 // MAIN LOOKUP
 // ===============================
 
@@ -273,6 +359,7 @@ async function analyzeCFX() {
   currentCode = code;
   setStatus("loading", "Checking server…");
   setLoadingState(true);
+  resetPingGraph();
 
   try {
     const res = await fetch(`/api/resolve?code=${code}`);
@@ -344,6 +431,7 @@ async function analyzeCFX() {
     };
 
     addToHistory(code, d.hostname || "Unknown");
+    startPingGraph();
 
   } catch (err) {
     console.error(err);
@@ -523,6 +611,28 @@ themeToggle.addEventListener("click", () => {
 });
 
 // ===============================
+// SIDEBAR COLLAPSE
+// ===============================
+
+sidebarToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("collapsed");
+});
+
+// ===============================
+// GLOBAL SEARCH
+// ===============================
+
+globalSearch.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    const val = globalSearch.value.trim();
+    if (!val) return;
+    cfxInput.value = val;
+    switchView("lookup");
+    analyzeCFX();
+  }
+});
+
+// ===============================
 // INIT
 // ===============================
 
@@ -536,3 +646,4 @@ initTheme();
 renderHistory();
 renderFavorites();
 setTopStatus("idle", "Idle");
+drawPingGraph();

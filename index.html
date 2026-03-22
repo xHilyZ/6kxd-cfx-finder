@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <title>CFX Finder • 6KXD Cyber-Lux Lookup</title>
+  <!-- Inter Tight -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
     <!-- Sidebar -->
-    <aside class="sidebar glass">
-      <div class="sidebar-brand">
-        <div class="sidebar-logo">6</div>
-        <div class="sidebar-text">
-          <div class="sidebar-title">6KXD Tools</div>
-          <div class="sidebar-sub">CFX Suite</div>
+    <aside class="sidebar glass" id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">6</div>
+          <div class="sidebar-text">
+            <div class="sidebar-title">6KXD Tools</div>
+            <div class="sidebar-sub">CFX Suite</div>
+          </div>
         </div>
+        <button id="sidebarToggle" class="sidebar-toggle" title="Collapse sidebar">⟨⟩</button>
       </div>
 
       <nav class="sidebar-nav">
@@ -50,6 +57,16 @@
           <h1 class="top-title">CFX Finder</h1>
           <span class="top-sub">Cyber-Luxury Neon Lookup</span>
         </div>
+
+        <div class="top-center">
+          <input
+            id="globalSearch"
+            class="global-search"
+            type="text"
+            placeholder="Global search: CFX code, link, or name…"
+          />
+        </div>
+
         <div class="top-right">
           <div class="uptime-pill">
             <span>Uptime</span>
@@ -100,13 +117,19 @@
             <div class="right-column">
               <div id="resultsPanel" class="results-panel glass-soft">
                 <div class="results-header">
-                  <div>
+                  <div class="results-header-main">
                     <div id="serverName" class="server-title shimmer loading">Server Name</div>
                     <div id="serverPlayers" class="server-sub shimmer loading">0 players</div>
                   </div>
-                  <div class="results-actions">
-                    <button id="favoriteBtn" class="outline-btn small-btn">⭐ Favorite</button>
-                    <button id="joinBtn" class="primary-btn small-btn" disabled>Join Server</button>
+                  <div class="results-header-meta">
+                    <div class="ping-card">
+                      <div class="ping-label">Ping trend</div>
+                      <canvas id="pingGraph" width="180" height="40"></canvas>
+                    </div>
+                    <div class="results-actions">
+                      <button id="favoriteBtn" class="outline-btn small-btn">⭐ Favorite</button>
+                      <button id="joinBtn" class="primary-btn small-btn" disabled>Join Server</button>
+                    </div>
                   </div>
                 </div>
 
@@ -120,7 +143,6 @@
                   <ul id="serverEndpoints" class="small-list"></ul>
                 </div>
 
-                <!-- NEW BUTTON -->
                 <button id="openFullPanel" class="primary-btn fullpanel-btn">
                   View Full Players & Resources
                 </button>
