@@ -120,7 +120,7 @@ async function loadServerInfo(cfx) {
     const vars = d.vars || {};
 
     /* ------------------------------
-       ONLINE STATUS (FIXED)
+       ONLINE STATUS
     ------------------------------ */
     const isOnline = (d.clients > 0) || d.online;
 
@@ -178,7 +178,7 @@ async function loadServerInfo(cfx) {
       String(vars.country || "Unknown");
 
     /* ------------------------------
-       JSON BUTTONS (FIXED)
+       JSON BUTTONS
     ------------------------------ */
     document.getElementById("playersJson").onclick = () =>
       window.open(url, "_blank");
@@ -187,10 +187,10 @@ async function loadServerInfo(cfx) {
       window.open(url, "_blank");
 
     /* ------------------------------
-       FULL PANEL BUTTON (NOW ALWAYS WORKS)
+       FULL PANEL BUTTON
     ------------------------------ */
     document.getElementById("openFullPanel").onclick = () =>
-      openFullPanel(d);
+      openFullPanelWithInternalEndpoints(d);
 
     /* ------------------------------
        AUTO REFRESH
@@ -231,18 +231,55 @@ function stopAutoRefresh() {
 }
 
 /* ============================================================
-   FULL PANEL
+   FULL PANEL WITH INTERNAL ENDPOINTS
 ============================================================ */
 
-function openFullPanel(data) {
+async function openFullPanelWithInternalEndpoints(data) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("fullPanel").style.display = "block";
 
-  const players = Array.isArray(data.players) ? data.players : [];
-  const resources = Array.isArray(data.resources) ? data.resources : [];
+  const ipPort = (data.connectEndPoints?.[0] || "").trim();
+  const base = ipPort ? `http://${ipPort}` : null;
 
-  loadFullPlayers(players);
-  loadFullResources(resources);
+  let players = [];
+  let resources = [];
+
+  if (base) {
+    try {
+      const pRes = await fetch(`${base}/players.json`);
+      if (pRes.ok) {
+        players = await pRes.json();
+      }
+    } catch (e) {
+      console.warn("players.json fetch failed", e);
+    }
+
+    try {
+      const rRes = await fetch(`${base}/resources.json`);
+      if (rRes.ok) {
+        resources = await rRes.json();
+      }
+    } catch (e) {
+      console.warn("resources.json fetch failed", e);
+    }
+  }
+
+  const hasPlayers = Array.isArray(players) && players.length > 0;
+  const hasResources = Array.isArray(resources) && resources.length > 0;
+
+  if (!hasPlayers) {
+    document.getElementById("fullPlayers").innerHTML =
+      "<div class='player-row glass'>Player list is hidden or unavailable for this server.</div>";
+  } else {
+    loadFullPlayers(players);
+  }
+
+  if (!hasResources) {
+    document.getElementById("fullResources").innerHTML =
+      "<div class='resource-row glass'>Resource list is hidden or unavailable for this server.</div>";
+  } else {
+    loadFullResources(resources);
+  }
 
   document.getElementById("closePanel").onclick = closeFullPanel;
 }
@@ -259,7 +296,10 @@ function loadFullPlayers(players) {
   players.forEach(p => {
     const div = document.createElement("div");
     div.className = "player-row glass";
-    div.textContent = `${p.name} (ID: ${p.id}) — Ping: ${p.ping}`;
+    const name = p.name || "Unknown";
+    const id = p.id ?? p.source ?? "N/A";
+    const ping = p.ping ?? "N/A";
+    div.textContent = `${name} (ID: ${id}) — Ping: ${ping}`;
     container.appendChild(div);
   });
 }
@@ -269,14 +309,19 @@ function loadFullResources(resources) {
   container.innerHTML = "";
 
   resources.forEach(r => {
+    const name = typeof r === "string" ? r : (r.name || "Unknown");
     const div = document.createElement("div");
     div.className = "resource-row glass";
-    div.textContent = r;
+    div.textContent = name;
     container.appendChild(div);
   });
 
   document.getElementById("resourceSort").onclick = () => {
-    const sorted = [...resources].sort();
+    const sorted = [...resources].sort((a, b) => {
+      const na = typeof a === "string" ? a : (a.name || "");
+      const nb = typeof b === "string" ? b : (b.name || "");
+      return na.localeCompare(nb);
+    });
     loadFullResources(sorted);
   };
 }
