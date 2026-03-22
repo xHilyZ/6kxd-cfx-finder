@@ -30,12 +30,11 @@ function setStatus(state) {
 // PLAYER CARD RENDERING
 // ===============================
 function renderPlayerCards(players) {
-  const container = document.getElementById("statPlayers");
   const listContainer = document.getElementById("fullPlayers");
+  const statPlayers = document.getElementById("statPlayers");
 
-  container.textContent = players.length;
+  statPlayers.textContent = players.length;
   listContainer.innerHTML = "";
-
   fullPlayers = players;
 
   players.forEach(p => {
@@ -44,7 +43,7 @@ function renderPlayerCards(players) {
       p.ping < 150 ? "ping-yellow" :
       "ping-red";
 
-    const card = `
+    listContainer.innerHTML += `
       <div class="player-card">
         <div class="player-avatar">${p.name.charAt(0).toUpperCase()}</div>
         <div>
@@ -54,8 +53,6 @@ function renderPlayerCards(players) {
         <div class="ping-indicator ${pingClass}" style="margin-left:auto"></div>
       </div>
     `;
-
-    listContainer.innerHTML += card;
   });
 }
 
@@ -63,12 +60,11 @@ function renderPlayerCards(players) {
 // RESOURCE CHIP RENDERING
 // ===============================
 function renderResourceChips(resources) {
-  const container = document.getElementById("statResources");
+  const statResources = document.getElementById("statResources");
   const listContainer = document.getElementById("fullResources");
 
-  container.textContent = resources.length;
+  statResources.textContent = resources.length;
   listContainer.innerHTML = "";
-
   fullResources = resources;
 
   resources.forEach(r => {
@@ -152,7 +148,6 @@ async function analyzeCFX() {
   setStatus("loading");
   document.getElementById("greeting").style.display = "none";
 
-  // Extract code from any input
   const codeMatch = input.match(/[a-zA-Z0-9]{6,}/);
   if (!codeMatch) {
     setStatus("offline");
@@ -168,7 +163,7 @@ async function analyzeCFX() {
     const data = await res.json();
     const d = data.Data;
 
-    // SERVER NAME
+    // NAME
     document.getElementById("serverName").textContent = d.hostname || "Unknown Server";
 
     // STATUS
@@ -178,10 +173,21 @@ async function analyzeCFX() {
     const ip = d.connectEndPoints?.[0] || "Hidden";
     document.getElementById("serverIP").textContent = `IP: ${ip}`;
 
-    // BANNER
-    if (d.banner_connecting) {
+    // ICON
+    if (d.icon) {
+      document.getElementById("serverIcon").style.backgroundImage = `url(${d.icon})`;
+    }
+
+    // BANNER FIX
+    let banner =
+      d.banner_connecting ||
+      d.banner_detail ||
+      d.icon ||
+      null;
+
+    if (banner) {
       document.getElementById("serverBannerWrap").style.display = "block";
-      document.getElementById("serverBanner").src = d.banner_connecting;
+      document.getElementById("serverBanner").src = banner;
     } else {
       document.getElementById("serverBannerWrap").style.display = "none";
     }
@@ -207,7 +213,7 @@ async function analyzeCFX() {
       document.getElementById("serverCountry").textContent = `Country: ${d.vars.country}`;
     }
 
-    // SHOW CARD
+    // SHOW UI
     document.getElementById("serverInfo").style.display = "flex";
     document.getElementById("jsonButtons").style.display = "flex";
     document.getElementById("openFullPanel").style.display = "block";

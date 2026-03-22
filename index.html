@@ -9,7 +9,7 @@
 
   <!-- HEADER -->
   <header class="header glass">
-    <h2 class="header-title centered-title">6kxd CFX Finder</h2>
+    <h2 class="centered-title">6kxd CFX Finder</h2>
   </header>
 
   <div class="container">
@@ -38,7 +38,7 @@
       <span id="statusText">Waiting...</span>
     </div>
 
-    <!-- GREETING SCREEN -->
+    <!-- GREETING -->
     <div id="greeting" class="greeting glass">
       Ready to search. Enter a CFX code above.
     </div>
@@ -46,12 +46,11 @@
     <!-- SERVER INFO CARD -->
     <div id="serverInfo" class="server-card glass" style="display:none;">
       <div class="server-left">
-        <div class="server-icon"></div>
+        <div id="serverIcon" class="server-icon"></div>
       </div>
 
       <div class="server-right">
 
-        <!-- STATUS INDICATOR -->
         <div class="server-status-row">
           <div id="serverStatusDot" class="status-dot"></div>
           <h2 id="serverName" class="server-name"></h2>
@@ -87,12 +86,7 @@
 
         <p id="serverDesc" class="server-desc"></p>
         <p id="serverLoc" class="server-loc"></p>
-
-        <!-- GEOIP COUNTRY -->
         <p id="serverCountry" class="server-country"></p>
-
-        <!-- PING HEATMAP -->
-        <div id="pingHeatmap" class="ping-heatmap glass" style="display:none;"></div>
 
       </div>
     </div>
@@ -116,6 +110,9 @@
   <!-- FULL PANEL -->
   <div id="fullPanel" class="full-panel glass">
     <div class="full-panel-content">
+
+      <!-- STICKY CLOSE BUTTON -->
+      <button id="closePanel" class="close-btn">Close Panel</button>
 
       <h2 class="panel-title">Server Data Details</h2>
 
@@ -142,7 +139,6 @@
 
       </div>
 
-      <button id="closePanel" class="close-btn">Close Panel</button>
     </div>
   </div>
 
