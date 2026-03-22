@@ -150,17 +150,30 @@ input {
   background: #334155;
 }
 
-/* AUTO REFRESH */
-.auto-refresh {
+/* STATUS BAR */
+.status-bar {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+  padding: 15px;
 }
 
-.last-refresh {
-  color: #9ca3af;
-  font-size: 14px;
+.status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: gray;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+
+.status-online { background: #4ade80; }
+.status-offline { background: #f87171; }
+.status-loading { background: #facc15; }
+
+.status-text {
+  font-size: 15px;
+  font-weight: 600;
 }
 
 /* GREETING */
@@ -189,27 +202,13 @@ input {
   background-repeat: no-repeat;
 }
 
-/* STATUS INDICATOR */
+/* SERVER STATUS ROW */
 .server-status-row {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: gray;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
-}
-
-.status-text {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* SERVER NAME */
 .server-name {
   font-size: 28px;
   font-weight: 700;
@@ -266,41 +265,66 @@ input {
   color: #93c5fd;
 }
 
-/* PING HEATMAP */
-.ping-heatmap {
-  margin-top: 20px;
-  padding: 15px;
-}
-
-.heatmap-row {
+/* PLAYER CARDS */
+.player-card {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  transition: 0.2s ease;
 }
 
-.heatmap-label {
-  width: 90px;
-  font-size: 14px;
-  color: #9ca3af;
+.player-card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-3px);
 }
 
-.heatmap-bar {
+.player-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: white;
+}
+
+.ping-indicator {
+  width: 12px;
   height: 12px;
-  border-radius: 6px;
-  background: #3b82f6;
-  transition: width 0.3s ease;
+  border-radius: 50%;
 }
 
-/* JSON OUTPUT */
-.json-output {
-  margin-top: 20px;
-  padding: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-  border-radius: 10px;
+.ping-green { background: #4ade80; }
+.ping-yellow { background: #facc15; }
+.ping-red { background: #f87171; }
+
+/* RESOURCE CHIPS */
+.resource-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 4px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 20px;
+  font-size: 13px;
+  color: #bfdbfe;
+  transition: 0.2s ease;
 }
 
-/* OVERLAY */
+.resource-chip:hover {
+  background: rgba(59,130,246,0.25);
+  border-color: rgba(59,130,246,0.5);
+}
+
+/* FULL PANEL */
 .overlay {
   position: fixed;
   inset: 0;
@@ -316,7 +340,6 @@ input {
   pointer-events: all;
 }
 
-/* FULL PANEL — NOW A SMALLER CENTERED BOX */
 .full-panel {
   position: fixed;
   bottom: -100%;
@@ -344,6 +367,12 @@ input {
   text-shadow: 0 0 12px rgba(96,165,250,0.4);
 }
 
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
 .panel-heading {
   color: #60a5fa;
   font-size: 20px;
@@ -351,14 +380,6 @@ input {
   font-weight: 600;
 }
 
-/* GRID */
-.panel-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-}
-
-/* PANEL SEARCH */
 .panel-search {
   width: 100%;
   padding: 10px;
@@ -369,7 +390,6 @@ input {
   color: white;
 }
 
-/* RESOURCE CONTROLS */
 .resource-controls {
   display: flex;
   gap: 10px;
@@ -381,13 +401,15 @@ input {
   font-size: 13px;
 }
 
-/* PLAYER LIST */
-#fullPlayers ul {
+/* FULL PANEL LISTS */
+#fullPlayers ul,
+#fullResources ul {
   list-style: none;
   padding-left: 0;
 }
 
-#fullPlayers li {
+#fullPlayers li,
+#fullResources li {
   padding: 8px 0;
   border-bottom: 1px solid #1e293b;
   font-size: 15px;
@@ -411,21 +433,6 @@ input {
 .ping-good { color: #4ade80; }
 .ping-mid { color: #facc15; }
 .ping-bad { color: #f87171; }
-
-/* RESOURCES */
-#fullResources ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-#fullResources li {
-  padding: 6px 0;
-  border-bottom: 1px solid #1e293b;
-  color: #cbd5e1;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-  transition: 0.2s ease;
-}
 
 #fullResources li:hover {
   color: #93c5fd;

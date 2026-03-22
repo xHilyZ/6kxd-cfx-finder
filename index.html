@@ -32,16 +32,10 @@
       <div id="recentList" class="recent-list"></div>
     </div>
 
-    <!-- AUTO REFRESH -->
-    <div class="auto-refresh glass">
-      <label for="autoRefreshSelect">Auto-refresh:</label>
-      <select id="autoRefreshSelect">
-        <option value="0">Off</option>
-        <option value="10000">Every 10s</option>
-        <option value="30000">Every 30s</option>
-        <option value="60000">Every 60s</option>
-      </select>
-      <span id="lastRefresh" class="last-refresh"></span>
+    <!-- STATUS BAR -->
+    <div id="statusBar" class="status-bar glass">
+      <span id="statusDot" class="status-dot"></span>
+      <span id="statusText">Waiting...</span>
     </div>
 
     <!-- GREETING SCREEN -->
