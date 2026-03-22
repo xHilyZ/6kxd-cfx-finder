@@ -1,162 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>6kxd CFX Finder</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Server Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <header class="header glass">
-    <h2 class="header-title centered-title">6kxd CFX Finder</h2>
-  </header>
+<div class="container">
 
-  <div class="container">
-
-    <!-- SEARCH AREA -->
-    <h1 class="title">CFX.re Server Finder</h1>
-    <p class="subtitle">Get detailed information about any FiveM server instantly</p>
-
-    <div class="input-card glass">
-      <input id="cfxInput" type="text" placeholder="Paste CFX link, IP:PORT, or any message containing a code">
-      <button id="analyzeBtn" class="btn-primary">Analyze</button>
-    </div>
-
-    <!-- RECENT LOOKUPS -->
-    <div id="recentLookups" class="recent-lookups glass" style="display:none;">
-      <div class="recent-header">
-        <span>Recent Lookups</span>
-        <button id="clearRecent" class="btn-link">Clear</button>
-      </div>
-      <div id="recentList" class="recent-list"></div>
-    </div>
-
-    <!-- AUTO REFRESH -->
-    <div class="auto-refresh glass">
-      <label for="autoRefreshSelect">Auto-refresh:</label>
-      <select id="autoRefreshSelect">
-        <option value="0">Off</option>
-        <option value="10000">Every 10s</option>
-        <option value="30000">Every 30s</option>
-        <option value="60000">Every 60s</option>
-      </select>
-      <span id="lastRefresh" class="last-refresh"></span>
-    </div>
-
-    <!-- GREETING SCREEN -->
-    <div id="greeting" class="greeting glass">
-      Ready to search. Enter a CFX code above.
-    </div>
-
-    <!-- SERVER INFO CARD -->
-    <div id="serverInfo" class="server-card glass" style="display:none;">
-      <div class="server-left">
-        <div class="server-icon"></div>
-      </div>
-
-      <div class="server-right">
-
-        <!-- STATUS INDICATOR -->
-        <div class="server-status-row">
-          <div id="serverStatusDot" class="status-dot"></div>
-          <h2 id="serverName" class="server-name"></h2>
-          <span id="serverStatusText" class="status-text"></span>
-        </div>
-
-        <p id="serverIP"></p>
-
-        <!-- SERVER BANNER -->
-        <div id="serverBannerWrap" class="banner-wrap" style="display:none;">
-          <img id="serverBanner" class="server-banner" alt="Server Banner">
-        </div>
-
-        <!-- STATS GRID -->
-        <div class="stats-grid">
-          <div class="stat-box glass">
-            <h4>👥 Players</h4>
-            <p id="statPlayers"></p>
-          </div>
-          <div class="stat-box glass">
-            <h4>📦 Resources</h4>
-            <p id="statResources"></p>
-          </div>
-          <div class="stat-box glass">
-            <h4>🏗️ Build</h4>
-            <p id="statBuild"></p>
-          </div>
-          <div class="stat-box glass">
-            <h4>🌐 Locale</h4>
-            <p id="statLocale"></p>
-          </div>
-        </div>
-
-        <p id="serverDesc" class="server-desc"></p>
-        <p id="serverLoc" class="server-loc"></p>
-
-        <!-- GEOIP COUNTRY -->
-        <p id="serverCountry" class="server-country"></p>
-
-        <!-- PING HEATMAP -->
-        <div id="pingHeatmap" class="ping-heatmap glass" style="display:none;"></div>
-
-      </div>
-    </div>
-
-    <!-- JSON BUTTONS -->
-    <div class="json-buttons" id="jsonButtons" style="display:none;">
-      <button id="playersJson" class="btn-secondary">Players JSON</button>
-      <button id="infoJson" class="btn-secondary">Server Info JSON</button>
-    </div>
-
-    <button id="openFullPanel" class="btn-primary full-btn" style="display:none;">
-      View Full Player & Resource Lists
-    </button>
-
-    <pre id="jsonOutput" class="json-output glass" style="display:none;"></pre>
+  <!-- Banner -->
+  <div class="banner-wrap">
+    <img id="serverBanner" class="banner-img" src="" alt="Server Banner">
   </div>
 
-  <!-- OVERLAY -->
-  <div id="overlay" class="overlay"></div>
+  <!-- Server Name + Status -->
+  <div class="server-header">
+    <h1 id="serverName">Server Name</h1>
+    <div class="status-row">
+      <span class="status-dot"></span>
+      <span id="serverStatus">Online</span>
+    </div>
+    <div id="ipEl" class="server-ip">IP: Unknown</div>
+  </div>
 
-  <!-- FULL PANEL -->
-  <div id="fullPanel" class="full-panel glass">
-    <div class="full-panel-content">
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-label">Players</div>
+      <div id="statPlayers" class="stat-value">0 / 0</div>
+    </div>
 
-      <h2 class="panel-title">Server Data Details</h2>
+    <div class="stat-box">
+      <div class="stat-label">Resources</div>
+      <div id="statResources" class="stat-value">0</div>
+    </div>
 
-      <div class="panel-grid">
+    <div class="stat-box">
+      <div class="stat-label">Build</div>
+      <div id="statBuild" class="stat-value">Unknown</div>
+    </div>
 
-        <!-- PLAYERS PANEL -->
-        <div>
-          <h3 class="panel-heading">Online Players</h3>
-          <input id="playerSearch" class="panel-search" type="text" placeholder="Search players by name, ID, or ping">
-          <div id="fullPlayers"></div>
-        </div>
-
-        <!-- RESOURCES PANEL -->
-        <div>
-          <h3 class="panel-heading">Resources List</h3>
-
-          <div class="resource-controls">
-            <input id="resourceSearch" class="panel-search" type="text" placeholder="Search resources">
-            <button id="resourceSort" class="btn-secondary small">Sort A–Z</button>
-          </div>
-
-          <div id="fullResources"></div>
-        </div>
-
-      </div>
-
-      <button id="closePanel" class="close-btn">Close Panel</button>
+    <div class="stat-box">
+      <div class="stat-label">Locale</div>
+      <div id="statLocale" class="stat-value">Unknown</div>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer glass">
-    <span>Built by 6kxd | Powered by CFX.re</span>
-  </footer>
+  <!-- Buttons Row -->
+  <div class="button-row">
+    <button id="copyIP">Copy IP</button>
+    <button id="copyCFX">Copy CFX</button>
+    <button id="openFiveM">Open in FiveM</button>
+    <button id="openDiscord">Discord</button>
+    <button id="openWebsite">Website</button>
+  </div>
 
-  <script src="app.js"></script>
+  <!-- Latency Bars -->
+  <div class="latency-block">
+    <div class="latency-bar green"></div>
+    <div class="latency-bar yellow"></div>
+    <div class="latency-bar orange"></div>
+    <div class="latency-bar red"></div>
+
+    <div class="latency-labels">
+      <span>0–50ms</span>
+      <span>50–100ms</span>
+      <span>100–150ms</span>
+      <span>150ms+</span>
+    </div>
+  </div>
+
+  <!-- JSON Buttons -->
+  <div class="json-row">
+    <button id="playersJSON">Players JSON</button>
+    <button id="serverJSON">Server Info JSON</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Built by 6ixxd | Powered by CFX.re
+  </div>
+
+</div>
+
 </body>
 </html>
