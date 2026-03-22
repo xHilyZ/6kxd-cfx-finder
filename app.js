@@ -141,18 +141,27 @@ document.getElementById("resourceSort").addEventListener("click", () => {
 });
 
 // ===============================
-// GLOBAL SERVER SEARCH (NEW)
+// GLOBAL SERVER SEARCH (FIXED)
 // ===============================
 const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
 const serverResults = document.getElementById("serverResults");
 
-// Load all servers once
+// Load servers using paginated API
 async function loadAllServers() {
   try {
-    const res = await fetch("https://servers-frontend.fivem.net/api/servers/");
-    const data = await res.json();
-    allServers = data;
+    const res = await fetch("https://servers-frontend.fivem.net/api/servers/stream/");
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let json = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      json += decoder.decode(value);
+    }
+
+    allServers = JSON.parse(json);
   } catch (err) {
     console.error("Failed to load server list", err);
   }
@@ -252,9 +261,7 @@ async function analyzeCFX() {
       document.getElementById("serverIcon").style.backgroundImage = `url(${d.icon})`;
     }
 
-    // ===============================
-    // BANNER FIX (ALL POSSIBLE LOCATIONS)
-    // ===============================
+    // BANNER FIX
     let banner =
       d.banner_connecting ||
       d.banner_detail ||
