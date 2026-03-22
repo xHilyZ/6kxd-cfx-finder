@@ -5,7 +5,8 @@ let fullPlayers = [];
 let fullResources = [];
 let sortAZ = false;
 
-let allServers = []; // for global search
+let allServers = []; // cached AU/NZ servers
+let serversLoaded = false; // load only once
 
 // ===============================
 // STATUS BAR
@@ -147,28 +148,41 @@ const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
 const serverResults = document.getElementById("serverResults");
 
-// Load servers using paginated API (3 pages)
-async function loadAllServers() {
+// Load full server list ONLY when typing starts
+async function loadServersIfNeeded() {
+  if (serversLoaded) return;
+
   try {
-    let pages = [0, 1, 2]; // Option A: 3 pages
-    let results = [];
+    const res = await fetch("https://servers-frontend.fivem.net/api/servers/");
+    const json = await res.json();
 
-    for (let p of pages) {
-      const res = await fetch(`https://servers-frontend.fivem.net/api/servers/page/${p}`);
-      const json = await res.json();
-      results = results.concat(json);
-    }
+    // Filter AU + NZ by IP ranges
+    allServers = json.filter(s => {
+      const endpoints = s.Data?.connectEndPoints || [];
 
-    allServers = results;
+      return endpoints.some(ip =>
+        ip.startsWith("139.99.") ||   // AU
+        ip.startsWith("103.212.") ||  // AU
+        ip.startsWith("51.79.") ||    // AU
+        ip.startsWith("54.206.") ||   // AU
+        ip.startsWith("43.229.") ||   // AU
+        ip.startsWith("103.1.") ||    // AU
+        ip.startsWith("45.248.") ||   // AU
+        ip.startsWith("103.254.") ||  // NZ
+        ip.startsWith("103.16.") ||   // NZ
+        ip.startsWith("103.26.") ||   // NZ
+        ip.startsWith("103.50.")      // NZ
+      );
+    });
+
+    serversLoaded = true;
   } catch (err) {
     console.error("Failed to load server list", err);
   }
 }
 
-loadAllServers();
-
 // Live search
-globalInput.addEventListener("input", () => {
+globalInput.addEventListener("input", async () => {
   const term = globalInput.value.toLowerCase();
 
   if (term.length < 2) {
@@ -176,27 +190,11 @@ globalInput.addEventListener("input", () => {
     return;
   }
 
-  const matches = allServers.filter(s => {
-    const nameMatch = s.Data?.hostname?.toLowerCase().includes(term);
+  await loadServersIfNeeded();
 
-    const endpoints = s.Data?.connectEndPoints || [];
-
-    const isAUNZ = endpoints.some(ip =>
-      ip.startsWith("139.99.") ||   // AU
-      ip.startsWith("103.212.") ||  // AU
-      ip.startsWith("51.79.") ||    // AU
-      ip.startsWith("54.206.") ||   // AU
-      ip.startsWith("43.229.") ||   // AU
-      ip.startsWith("103.1.") ||    // AU
-      ip.startsWith("45.248.") ||   // AU
-      ip.startsWith("103.254.") ||  // NZ
-      ip.startsWith("103.16.") ||   // NZ
-      ip.startsWith("103.26.") ||   // NZ
-      ip.startsWith("103.50.")      // NZ
-    );
-
-    return nameMatch && isAUNZ;
-  });
+  const matches = allServers.filter(s =>
+    s.Data?.hostname?.toLowerCase().includes(term)
+  );
 
   serverResults.innerHTML = "";
 
