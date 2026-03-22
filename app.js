@@ -1,318 +1,333 @@
-document.addEventListener("DOMContentLoaded", () => {
-
 /* ============================================================
-   GLOBAL STATE
+   DOM READY WRAPPER (bulletproof)
 ============================================================ */
-let lastData = null;
-let autoRefreshTimer = null;
-
-/* ============================================================
-   ELEMENTS
-============================================================ */
-const serverInfo = document.getElementById("serverInfo");
-const serverBanner = document.getElementById("serverBanner");
-const serverBannerWrap = document.getElementById("serverBannerWrap");
-
-const nameEl = document.getElementById("serverName");
-const ipEl = document.getElementById("serverIP");
-const playersEl = document.getElementById("statPlayers");
-const resourcesEl = document.getElementById("statResources");
-const buildEl = document.getElementById("statBuild");
-const localeEl = document.getElementById("statLocale");
-
-const descEl = document.getElementById("serverDesc");
-const locEl = document.getElementById("serverLoc");
-const countryEl = document.getElementById("serverCountry");
-
-const pingHeatmap = document.getElementById("pingHeatmap");
-const jsonOutput = document.getElementById("jsonOutput");
-
-/* ============================================================
-   ESCAPE HTML
-============================================================ */
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-/* ============================================================
-   CLEAN SERVER NAME
-============================================================ */
-function cleanName(name) {
-  return name.replace(/\^[0-9]/g, "");
-}
-
-/* ============================================================
-   FETCH SERVER INFO (CFX)
-============================================================ */
-async function fetchServer(code) {
-  const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("CFX API error");
-  return res.json();
-}
-
-/* ============================================================
-   FETCH INTERNAL ENDPOINTS
-============================================================ */
-async function fetchInternal(ipPort) {
-  const base = `http://${ipPort}`;
-
-  let players = [];
-  let resources = [];
-
-  try {
-    const p = await fetch(`${base}/players.json`);
-    if (p.ok) players = await p.json();
-  } catch {}
-
-  try {
-    const r = await fetch(`${base}/resources.json`);
-    if (r.ok) resources = await r.json();
-  } catch {}
-
-  return { players, resources };
-}
-
-/* ============================================================
-   MAIN LOAD FUNCTION
-============================================================ */
-async function loadServer(code) {
-  try {
-    const data = await fetchServer(code);
-    lastData = data;
-
-    const d = data.Data;
-
-    /* ------------------------------
-       BANNER
-    ------------------------------ */
-    if (d.vars?.banner_detail) {
-      serverBanner.src = d.vars.banner_detail;
-      serverBannerWrap.style.display = "block";
+(function () {
+  function domReady(fn) {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(fn, 1);
     } else {
-      serverBannerWrap.style.display = "none";
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
+
+  domReady(() => {
+
+    /* ============================================================
+       GLOBAL STATE
+    ============================================================ */
+    let lastData = null;
+
+    /* ============================================================
+       ELEMENTS (SAFE LOOKUP)
+    ============================================================ */
+    const $ = id => document.getElementById(id);
+
+    const serverInfo = $("serverInfo");
+    const serverBanner = $("serverBanner");
+    const serverBannerWrap = $("serverBannerWrap");
+
+    const nameEl = $("serverName");
+    const ipEl = $("serverIP");
+    const playersEl = $("statPlayers");
+    const resourcesEl = $("statResources");
+    const buildEl = $("statBuild");
+    const localeEl = $("statLocale");
+
+    const descEl = $("serverDesc");
+    const locEl = $("serverLoc");
+    const countryEl = $("serverCountry");
+
+    const pingHeatmap = $("pingHeatmap");
+    const jsonOutput = $("jsonOutput");
+
+    const fullPanel = $("fullPanel");
+    const overlay = $("overlay");
+    const openFullPanel = $("openFullPanel");
+    const closePanel = $("closePanel");
+    const fullPlayers = $("fullPlayers");
+    const fullResources = $("fullResources");
+
+    const playerSearch = $("playerSearch");
+    const resourceSearch = $("resourceSearch");
+    const resourceSort = $("resourceSort");
+
+    /* ============================================================
+       UTILS
+    ============================================================ */
+    const escapeHTML = str =>
+      String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    const cleanName = name => name.replace(/\^[0-9]/g, "");
+
+    /* ============================================================
+       FETCH CFX
+    ============================================================ */
+    async function fetchServer(code) {
+      const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("CFX API error");
+      return res.json();
     }
 
-    /* ------------------------------
-       BASIC INFO
-    ------------------------------ */
-    nameEl.textContent = escapeHTML(cleanName(d.hostname));
-    ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+    /* ============================================================
+       FETCH INTERNAL ENDPOINTS
+    ============================================================ */
+    async function fetchInternal(ipPort) {
+      const base = `http://${ipPort}`;
 
-    playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
-    resourcesEl.textContent = d.resources.length;
-    buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
-    localeEl.textContent = d.locale || "Unknown";
+      let players = [];
+      let resources = [];
 
-    descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
-    locEl.textContent = "Location info unavailable.";
+      try {
+        const p = await fetch(`${base}/players.json`);
+        if (p.ok) players = await p.json();
+      } catch {}
 
-    /* ------------------------------
-       GEOIP
-    ------------------------------ */
-    const ip = d.connectEndPoints?.[0]?.split(":")[0];
-    if (ip) {
-      countryEl.textContent = await fetchGeoIP(ip);
+      try {
+        const r = await fetch(`${base}/resources.json`);
+        if (r.ok) resources = await r.json();
+      } catch {}
+
+      return { players, resources };
     }
 
-    serverInfo.style.opacity = "1";
+    /* ============================================================
+       MAIN LOAD FUNCTION
+    ============================================================ */
+    async function loadServer(code) {
+      try {
+        const data = await fetchServer(code);
+        lastData = data;
 
-    /* ------------------------------
+        const d = data.Data;
+
+        /* Banner */
+        if (d.vars?.banner_detail) {
+          serverBanner.src = d.vars.banner_detail;
+          serverBannerWrap.style.display = "block";
+        } else {
+          serverBannerWrap.style.display = "none";
+        }
+
+        /* Basic Info */
+        nameEl.textContent = escapeHTML(cleanName(d.hostname));
+        ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+
+        playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
+        resourcesEl.textContent = d.resources.length;
+        buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
+        localeEl.textContent = d.locale || "Unknown";
+
+        descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
+        locEl.textContent = "Location info unavailable.";
+
+        /* GeoIP */
+        const ip = d.connectEndPoints?.[0]?.split(":")[0];
+        if (ip) {
+          countryEl.textContent = await fetchGeoIP(ip);
+        }
+
+        serverInfo.style.opacity = "1";
+
+        /* Heatmap */
+        renderHeatmap(d.players);
+
+      } catch (err) {
+        alert("Failed to load server info.");
+        console.error(err);
+      }
+    }
+
+    /* ============================================================
        HEATMAP
-    ------------------------------ */
-    renderHeatmap(d.players);
+    ============================================================ */
+    function renderHeatmap(players) {
+      if (!players || players.length === 0) {
+        pingHeatmap.style.display = "none";
+        return;
+      }
 
-  } catch (err) {
-    alert("Failed to load server info.");
-    console.error(err);
-  }
-}
+      pingHeatmap.style.display = "block";
+      pingHeatmap.innerHTML = "";
 
-/* ============================================================
-   HEATMAP
-============================================================ */
-function renderHeatmap(players) {
-  if (!players || players.length === 0) {
-    pingHeatmap.style.display = "none";
-    return;
-  }
+      const ranges = {
+        "0–50ms": players.filter(p => p.ping <= 50).length,
+        "50–100ms": players.filter(p => p.ping > 50 && p.ping <= 100).length,
+        "100–150ms": players.filter(p => p.ping > 100 && p.ping <= 150).length,
+        "150ms+": players.filter(p => p.ping > 150).length
+      };
 
-  pingHeatmap.style.display = "block";
-  pingHeatmap.innerHTML = "";
+      const max = Math.max(...Object.values(ranges));
 
-  const ranges = {
-    "0–50ms": players.filter(p => p.ping <= 50).length,
-    "50–100ms": players.filter(p => p.ping > 50 && p.ping <= 100).length,
-    "100–150ms": players.filter(p => p.ping > 100 && p.ping <= 150).length,
-    "150ms+": players.filter(p => p.ping > 150).length
-  };
+      for (const [label, count] of Object.entries(ranges)) {
+        const row = document.createElement("div");
+        row.className = "heatmap-row";
 
-  const max = Math.max(...Object.values(ranges));
+        const lbl = document.createElement("div");
+        lbl.className = "heatmap-label";
+        lbl.textContent = label;
 
-  for (const [label, count] of Object.entries(ranges)) {
-    const row = document.createElement("div");
-    row.className = "heatmap-row";
+        const bar = document.createElement("div");
+        bar.className = "heatmap-bar";
+        bar.style.width = `${(count / max) * 100}%`;
 
-    const lbl = document.createElement("div");
-    lbl.className = "heatmap-label";
-    lbl.textContent = label;
+        row.appendChild(lbl);
+        row.appendChild(bar);
+        pingHeatmap.appendChild(row);
+      }
+    }
 
-    const bar = document.createElement("div");
-    bar.className = "heatmap-bar";
-    bar.style.width = `${(count / max) * 100}%`;
+    /* ============================================================
+       JSON BUTTONS
+    ============================================================ */
+    $("playersJson").onclick = () => {
+      jsonOutput.style.display = "block";
+      jsonOutput.textContent = JSON.stringify(lastData?.Data?.players || {}, null, 2);
+    };
 
-    row.appendChild(lbl);
-    row.appendChild(bar);
-    pingHeatmap.appendChild(row);
-  }
-}
+    $("infoJson").onclick = () => {
+      jsonOutput.style.display = "block";
+      jsonOutput.textContent = JSON.stringify(lastData?.Data || {}, null, 2);
+    };
 
-/* ============================================================
-   JSON BUTTONS
-============================================================ */
-document.getElementById("playersJson").onclick = () => {
-  jsonOutput.style.display = "block";
-  jsonOutput.textContent = JSON.stringify(lastData?.Data?.players || {}, null, 2);
-};
+    /* ============================================================
+       FULL PANEL (INTERNAL ENDPOINTS)
+    ============================================================ */
+    if (openFullPanel) {
+      openFullPanel.onclick = async () => {
+        if (!lastData) return alert("Run a lookup first.");
 
-document.getElementById("infoJson").onclick = () => {
-  jsonOutput.style.display = "block";
-  jsonOutput.textContent = JSON.stringify(lastData?.Data || {}, null, 2);
-};
+        const d = lastData.Data;
+        const ipPort = d.connectEndPoints?.[0];
 
-/* ============================================================
-   FULL PANEL LOGIC (INTERNAL ENDPOINTS)
-============================================================ */
-const fullPanel = document.getElementById("fullPanel");
-const overlay = document.getElementById("overlay");
-const openFullPanel = document.getElementById("openFullPanel");
-const closePanel = document.getElementById("closePanel");
-const fullPlayers = document.getElementById("fullPlayers");
-const fullResources = document.getElementById("fullResources");
+        if (!ipPort) {
+          alert("Server IP unavailable.");
+          return;
+        }
 
-openFullPanel.onclick = async () => {
-  if (!lastData) return alert("Run a lookup first.");
+        const { players, resources } = await fetchInternal(ipPort);
 
-  const d = lastData.Data;
-  const ipPort = d.connectEndPoints?.[0];
+        if (!players.length) {
+          fullPlayers.innerHTML =
+            "<div class='player-row glass'>Player list hidden or unavailable.</div>";
+        } else {
+          renderFullPlayers(players);
+        }
 
-  if (!ipPort) {
-    alert("Server IP unavailable.");
-    return;
-  }
+        if (!resources.length) {
+          fullResources.innerHTML =
+            "<div class='resource-row glass'>Resource list hidden or unavailable.</div>";
+        } else {
+          renderFullResources(resources);
+        }
 
-  const { players, resources } = await fetchInternal(ipPort);
+        fullPanel.classList.add("open");
+        overlay.classList.add("show");
+      };
+    }
 
-  if (!players.length) {
-    fullPlayers.innerHTML =
-      "<div class='player-row glass'>Player list hidden or unavailable.</div>";
-  } else {
-    renderFullPlayers(players);
-  }
+    if (closePanel) {
+      closePanel.onclick = () => {
+        fullPanel.classList.remove("open");
+        overlay.classList.remove("show");
+      };
+    }
 
-  if (!resources.length) {
-    fullResources.innerHTML =
-      "<div class='resource-row glass'>Resource list hidden or unavailable.</div>";
-  } else {
-    renderFullResources(resources);
-  }
+    if (overlay) {
+      overlay.onclick = () => {
+        fullPanel.classList.remove("open");
+        overlay.classList.remove("show");
+      };
+    }
 
-  fullPanel.classList.add("open");
-  overlay.classList.add("show");
-};
+    /* ============================================================
+       PLAYER RENDERER
+    ============================================================ */
+    function renderFullPlayers(players) {
+      let html = "<ul>";
+      players.forEach(p => {
+        let pingClass =
+          p.ping <= 60 ? "ping-good" :
+          p.ping <= 120 ? "ping-mid" :
+          "ping-bad";
 
-closePanel.onclick = () => {
-  fullPanel.classList.remove("open");
-  overlay.classList.remove("show");
-};
+        html += `
+          <li>
+            <span class="player-id">[${p.id}]</span>
+            <span class="player-name">${escapeHTML(p.name)}</span>
+            <span class="player-ping ${pingClass}">${p.ping}ms</span>
+          </li>
+        `;
+      });
+      html += "</ul>";
+      fullPlayers.innerHTML = html;
 
-overlay.onclick = () => {
-  fullPanel.classList.remove("open");
-  overlay.classList.remove("show");
-};
+      if (playerSearch) {
+        playerSearch.oninput = () => {
+          const q = playerSearch.value.toLowerCase();
+          const filtered = players.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            String(p.id).includes(q) ||
+            String(p.ping).includes(q)
+          );
+          renderFullPlayers(filtered);
+        };
+      }
+    }
 
-/* ============================================================
-   PLAYER SEARCH
-============================================================ */
-const playerSearch = document.getElementById("playerSearch");
+    /* ============================================================
+       RESOURCE RENDERER
+    ============================================================ */
+    function renderFullResources(resources) {
+      let html = "<ul>";
+      resources.forEach(r => {
+        html += `<li>${escapeHTML(r)}</li>`;
+      });
+      html += "</ul>";
+      fullResources.innerHTML = html;
 
-function renderFullPlayers(players) {
-  let html = "<ul>";
-  players.forEach(p => {
-    let pingClass =
-      p.ping <= 60 ? "ping-good" :
-      p.ping <= 120 ? "ping-mid" :
-      "ping-bad";
+      if (resourceSearch) {
+        resourceSearch.oninput = () => {
+          const q = resourceSearch.value.toLowerCase();
+          const filtered = resources.filter(r => r.toLowerCase().includes(q));
+          renderFullResources(filtered);
+        };
+      }
 
-    html += `
-      <li>
-        <span class="player-id">[${p.id}]</span>
-        <span class="player-name">${escapeHTML(p.name)}</span>
-        <span class="player-ping ${pingClass}">${p.ping}ms</span>
-      </li>
-    `;
-  });
-  html += "</ul>";
-  fullPlayers.innerHTML = html;
+      if (resourceSort) {
+        resourceSort.onclick = () => {
+          const sorted = [...resources].sort();
+          renderFullResources(sorted);
+        };
+      }
+    }
 
-  playerSearch.oninput = () => {
-    const q = playerSearch.value.toLowerCase();
-    const filtered = players.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      String(p.id).includes(q) ||
-      String(p.ping).includes(q)
-    );
-    renderFullPlayers(filtered);
-  };
-}
+    /* ============================================================
+       GEOIP
+    ============================================================ */
+    async function fetchGeoIP(ip) {
+      try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
 
-/* ============================================================
-   RESOURCE SEARCH + SORT
-============================================================ */
-const resourceSearch = document.getElementById("resourceSearch");
-const resourceSort = document.getElementById("resourceSort");
+        const flag = data.country
+          ? String.fromCodePoint(
+              ...[...data.country].map(c => 127397 + c.charCodeAt())
+            )
+          : "";
 
-function renderFullResources(resources) {
-  let html = "<ul>";
-  resources.forEach(r => {
-    html += `<li>${escapeHTML(r)}</li>`;
-  });
-  html += "</ul>";
-  fullResources.innerHTML = html;
+        return `${data.country_name || "Unknown"} ${flag}`;
+      } catch {
+        return "Unknown";
+      }
+    }
 
-  resourceSearch.oninput = () => {
-    const q = resourceSearch.value.toLowerCase();
-    const filtered = resources.filter(r => r.toLowerCase().includes(q));
-    renderFullResources(filtered);
-  };
+    /* ============================================================
+       AUTO-LOAD IF URL HAS ?code=
+    ============================================================ */
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (code) loadServer(code);
 
-  resourceSort.onclick = () => {
-    const sorted = [...resources].sort();
-    renderFullResources(sorted);
-  };
-}
-
-/* ============================================================
-   GEOIP
-============================================================ */
-async function fetchGeoIP(ip) {
-  try {
-    const res = await fetch(`https://ipapi.co/${ip}/json/`);
-    const data = await res.json();
-
-    const flag = data.country
-      ? String.fromCodePoint(
-          ...[...data.country].map(c => 127397 + c.charCodeAt())
-        )
-      : "";
-
-    return `${data.country_name || "Unknown"} ${flag}`;
-  } catch {
-    return "Unknown";
-  }
-}
-
-}); // END DOMContentLoaded
+  }); // END domReady
+})();
