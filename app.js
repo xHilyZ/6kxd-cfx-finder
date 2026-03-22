@@ -120,7 +120,7 @@ async function loadServerInfo(cfx) {
     const vars = d.vars || {};
 
     /* ------------------------------
-       ONLINE STATUS (FIXED)
+       ONLINE STATUS (FINAL FIX)
     ------------------------------ */
     const isOnline = (d.clients > 0) || d.online;
 
@@ -133,9 +133,8 @@ async function loadServerInfo(cfx) {
     /* ------------------------------
        BASIC INFO
     ------------------------------ */
-    document.getElementById("serverName").textContent = d.hostname || "Unknown";
-    document.getElementById("serverIP").textContent =
-      d.connectEndPoints?.[0] || "Unknown";
+    document.getElementById("serverName").textContent = String(d.hostname || "Unknown");
+    document.getElementById("serverIP").textContent = String(d.connectEndPoints?.[0] || "Unknown");
 
     /* ------------------------------
        BANNER
@@ -157,27 +156,26 @@ async function loadServerInfo(cfx) {
       Array.isArray(d.resources) ? d.resources.length : 0;
 
     document.getElementById("statBuild").textContent =
-      vars.sv_enforceGameBuild || "Unknown";
+      String(vars.sv_enforceGameBuild || "Unknown");
 
     /* ------------------------------
        GEOIP (SAFE)
     ------------------------------ */
     const ip = (d.connectEndPoints?.[0] || "").split(":")[0];
-
     document.getElementById("statLocale").textContent =
       ip ? await fetchGeoIP(ip) : "Unknown";
 
     /* ------------------------------
-       DESCRIPTION + LOCATION + COUNTRY (SAFE)
+       SAFE STRINGS (NO CRASHES)
     ------------------------------ */
     document.getElementById("serverDesc").textContent =
-      vars.sv_projectDesc || "";
+      String(vars.sv_projectDesc || "");
 
     document.getElementById("serverLoc").textContent =
-      vars.locale || vars.sv_locale || vars.language || "";
+      String(vars.locale || vars.sv_locale || vars.language || "");
 
     document.getElementById("serverCountry").textContent =
-      vars.country || "Unknown";
+      String(vars.country || "Unknown");
 
     /* ------------------------------
        JSON BUTTONS
