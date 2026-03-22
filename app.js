@@ -162,6 +162,16 @@ async function loadServerInfo(cfx) {
       ip ? await fetchGeoIP(ip) : "Unknown";
 
     /* ------------------------------
+       DESCRIPTION + LOCATION + COUNTRY
+    ------------------------------ */
+    document.getElementById("serverDesc").textContent =
+      d.vars?.sv_projectDesc || "";
+    document.getElementById("serverLoc").textContent =
+      d.vars?.locale || "";
+    document.getElementById("serverCountry").textContent =
+      d.vars?.country || "";
+
+    /* ------------------------------
        JSON BUTTONS
     ------------------------------ */
     document.getElementById("playersJson").onclick = () =>
