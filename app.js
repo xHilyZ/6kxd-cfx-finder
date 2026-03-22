@@ -34,8 +34,6 @@ const browserRefresh = document.getElementById("browserRefresh");
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 const views = document.querySelectorAll(".view");
 
-const pageWrap = document.querySelector(".page-wrap");
-
 const themeToggle = document.getElementById("themeToggle");
 
 let currentCode = null;
@@ -619,7 +617,7 @@ themeToggle.addEventListener("click", () => {
 });
 
 // ===============================
-// EVENTS
+// EVENTS + INIT
 // ===============================
 
 analyzeBtn.addEventListener("click", analyzeCFX);
@@ -627,10 +625,6 @@ analyzeBtn.addEventListener("click", analyzeCFX);
 cfxInput.addEventListener("keypress", e => {
   if (e.key === "Enter") analyzeCFX();
 });
-
-// ===============================
-// INIT
-// ===============================
 
 initTheme();
 renderHistory();
