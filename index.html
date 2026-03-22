@@ -99,8 +99,6 @@
             <!-- Right column -->
             <div class="right-column">
               <div id="resultsPanel" class="results-panel glass-soft">
-                <div class="slide-handle"></div>
-
                 <div class="results-header">
                   <div>
                     <div id="serverName" class="server-title shimmer loading">Server Name</div>
@@ -126,32 +124,6 @@
                 <button id="openFullPanel" class="primary-btn fullpanel-btn">
                   View Full Players & Resources
                 </button>
-
-                <div class="panel glass-soft players-panel-full">
-                  <div class="panel-header">
-                    <h3>Players 👥</h3>
-                    <input id="playerSearch" class="pill-search" type="text" placeholder="🔍" />
-                  </div>
-                  <div id="playersList" class="players-list"></div>
-                </div>
-
-                <div class="panel glass-soft resources-panel-full">
-                  <div class="panel-header">
-                    <h3>Resources 📦</h3>
-                    <input id="resourceSearch" class="pill-search" type="text" placeholder="🔍" />
-                  </div>
-
-                  <div class="resource-tabs">
-                    <button class="resource-tab active" data-cat="gameplay">Gameplay</button>
-                    <button class="resource-tab" data-cat="interface">Interface</button>
-                    <button class="resource-tab" data-cat="vehicles">Vehicles</button>
-                    <button class="resource-tab" data-cat="maps">Maps</button>
-                    <button class="resource-tab" data-cat="scripts">Scripts</button>
-                    <button class="resource-tab" data-cat="others">Others</button>
-                  </div>
-
-                  <ul id="serverResources" class="small-list"></ul>
-                </div>
               </div>
 
               <footer class="footer">
@@ -228,12 +200,18 @@
 
       <div class="fullpanel-content">
         <div class="fullpanel-column">
-          <h3>Players</h3>
+          <div class="panel-header">
+            <h3>Players</h3>
+            <input id="fullPlayerSearch" class="pill-search" type="text" placeholder="🔍" />
+          </div>
           <div id="fullPlayersList" class="scroll-list"></div>
         </div>
 
         <div class="fullpanel-column">
-          <h3>Resources</h3>
+          <div class="panel-header">
+            <h3>Resources</h3>
+            <input id="fullResourceSearch" class="pill-search" type="text" placeholder="🔍" />
+          </div>
           <div id="fullResourcesList" class="scroll-list"></div>
         </div>
       </div>

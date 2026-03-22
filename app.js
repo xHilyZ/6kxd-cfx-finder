@@ -1,5 +1,5 @@
 // ===============================
-//  6KXD CFX FINDER – CYBER LUX
+//  6KXD CFX FINDER — CYBER LUX
 // ===============================
 
 // DOM ELEMENTS
@@ -13,15 +13,10 @@ const serverPlayers = document.getElementById("serverPlayers");
 const serverIcon = document.getElementById("serverIcon");
 const serverBanner = document.getElementById("serverBanner");
 const serverEndpoints = document.getElementById("serverEndpoints");
-const serverResources = document.getElementById("serverResources");
-const playersList = document.getElementById("playersList");
 const serverInfoList = document.getElementById("serverInfoList");
 const joinBtn = document.getElementById("joinBtn");
 const favoriteBtn = document.getElementById("favoriteBtn");
 const uptimeText = document.getElementById("uptimeText");
-
-const playerSearch = document.getElementById("playerSearch");
-const resourceSearch = document.getElementById("resourceSearch");
 
 const historyList = document.getElementById("historyList");
 const historyListFull = document.getElementById("historyListFull");
@@ -35,6 +30,16 @@ const sidebarItems = document.querySelectorAll(".sidebar-item");
 const views = document.querySelectorAll(".view");
 
 const themeToggle = document.getElementById("themeToggle");
+
+// Modal
+const openFullPanel = document.getElementById("openFullPanel");
+const closeFullPanel = document.getElementById("closeFullPanel");
+const fullPanelOverlay = document.getElementById("fullPanelOverlay");
+
+const fullPlayersList = document.getElementById("fullPlayersList");
+const fullResourcesList = document.getElementById("fullResourcesList");
+const fullPlayerSearch = document.getElementById("fullPlayerSearch");
+const fullResourceSearch = document.getElementById("fullResourceSearch");
 
 let currentCode = null;
 let currentServerData = null;
@@ -96,8 +101,6 @@ function setLoadingState(isLoading) {
     serverIcon,
     serverBanner,
     serverEndpoints,
-    serverResources,
-    playersList,
     serverInfoList
   ];
 
@@ -217,140 +220,6 @@ function renderFavorites() {
 }
 
 // ===============================
-// RESOURCE CATEGORIES
-// ===============================
-
-const resourceTabs = document.querySelectorAll(".resource-tab");
-
-resourceTabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    resourceTabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    renderResources(tab.dataset.cat);
-  });
-});
-
-function categorizeResources(list) {
-  const cats = {
-    gameplay: [],
-    interface: [],
-    vehicles: [],
-    maps: [],
-    scripts: [],
-    others: []
-  };
-
-  list.forEach(r => {
-    const name = r.toLowerCase();
-
-    if (name.includes("weapon") || name.includes("job") || name.includes("police") || name.includes("ambulance"))
-      cats.gameplay.push(r);
-    else if (name.includes("ui") || name.includes("hud") || name.includes("menu"))
-      cats.interface.push(r);
-    else if (name.includes("car") || name.includes("vehicle") || name.includes("bike"))
-      cats.vehicles.push(r);
-    else if (name.includes("map") || name.includes("interior"))
-      cats.maps.push(r);
-    else if (name.includes("script") || name.includes("addon"))
-      cats.scripts.push(r);
-    else
-      cats.others.push(r);
-  });
-
-  return cats;
-}
-
-function renderResources(category) {
-  serverResources.innerHTML = "";
-
-  if (!currentResources.length) {
-    serverResources.innerHTML = "<li>No resources listed.</li>";
-    return;
-  }
-
-  const cats = categorizeResources(currentResources);
-  const list = cats[category] || [];
-
-  const searchTerm = resourceSearch.value.toLowerCase();
-
-  const filtered = list.filter(r => r.toLowerCase().includes(searchTerm));
-
-  if (!filtered.length) {
-    serverResources.innerHTML = "<li>No matching resources.</li>";
-    return;
-  }
-
-  filtered.forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = r;
-    serverResources.appendChild(li);
-  });
-}
-
-// ===============================
-// PLAYER LIST
-// ===============================
-
-function renderPlayers(players) {
-  playersList.innerHTML = "";
-
-  const searchTerm = playerSearch.value.toLowerCase();
-
-  const filtered = players.filter(p =>
-    p.name?.toLowerCase().includes(searchTerm) ||
-    String(p.id).includes(searchTerm)
-  );
-
-  if (!filtered.length) {
-    playersList.innerHTML = "<div class='player-row'>No matching players.</div>";
-    return;
-  }
-
-  filtered.forEach(p => {
-    const row = document.createElement("div");
-    row.className = "player-row";
-
-    const avatar = document.createElement("div");
-    avatar.className = "player-avatar";
-    avatar.textContent = p.name ? p.name[0].toUpperCase() : "?";
-
-    const info = document.createElement("div");
-    info.className = "player-info";
-
-    const name = document.createElement("div");
-    name.className = "player-name";
-    name.textContent = p.name || `ID ${p.id}`;
-
-    const meta = document.createElement("div");
-    meta.className = "player-meta";
-
-    const id = document.createElement("span");
-    id.className = "player-id";
-    id.textContent = `ID ${p.id}`;
-
-    const ping = document.createElement("span");
-    ping.className = "player-ping";
-
-    if (p.ping < 60) ping.classList.add("good");
-    else if (p.ping < 120) ping.classList.add("mid");
-    else ping.classList.add("bad");
-
-    ping.textContent = `${p.ping}ms`;
-
-    meta.appendChild(id);
-    meta.appendChild(ping);
-
-    info.appendChild(name);
-    info.appendChild(meta);
-
-    row.appendChild(avatar);
-    row.appendChild(info);
-
-    playersList.appendChild(row);
-  });
-}
-
-// ===============================
 // SERVER INFO PANEL
 // ===============================
 
@@ -415,7 +284,7 @@ async function analyzeCFX() {
     }
 
     const data = await res.json();
-    if (!data || !data.Data) {
+        if (!data || !data.Data) {
       setStatus("offline", "Invalid or private server");
       setLoadingState(false);
       return;
@@ -455,17 +324,15 @@ async function analyzeCFX() {
     });
 
     currentResources = d.resources || [];
-    renderResources("gameplay");
-
     currentPlayers = d.players || [];
-    renderPlayers(currentPlayers);
 
     renderInfoPanel(d, code);
 
     const isFav = favorites.find(f => f.code === code);
     favoriteBtn.textContent = isFav ? "★ Favorited" : "⭐ Favorite";
 
-    favoriteBtn.onclick = () => toggleFavorite(code, d.hostname || "Unknown");
+    favoriteBtn.onclick = () =>
+      toggleFavorite(code, d.hostname || "Unknown");
 
     joinBtn.disabled = false;
     joinBtn.onclick = () => {
@@ -485,148 +352,3 @@ async function analyzeCFX() {
     setLoadingState(false);
   }
 }
-
-// ===============================
-// SEARCH LISTENERS
-// ===============================
-
-playerSearch.addEventListener("input", () => {
-  renderPlayers(currentPlayers);
-});
-
-resourceSearch.addEventListener("input", () => {
-  const activeTab = document.querySelector(".resource-tab.active");
-  renderResources(activeTab.dataset.cat);
-});
-
-// ===============================
-// GLOBAL SERVER BROWSER
-// ===============================
-
-async function loadGlobalServers() {
-  browserTableBody.innerHTML = `
-    <tr><td colspan="5" class="muted">Loading…</td></tr>
-  `;
-
-  try {
-    const res = await fetch("/api/servers");
-    if (!res.ok) {
-      browserTableBody.innerHTML = `
-        <tr><td colspan="5" class="muted">Failed to load servers.</td></tr>
-      `;
-      return;
-    }
-
-    const list = await res.json();
-    renderBrowserTable(list);
-
-  } catch (err) {
-    browserTableBody.innerHTML = `
-      <tr><td colspan="5" class="muted">Error loading servers.</td></tr>
-    `;
-  }
-}
-
-function renderBrowserTable(list) {
-  const search = browserSearch.value.toLowerCase();
-
-  const filtered = list.filter(s =>
-    s.hostname.toLowerCase().includes(search) ||
-    (s.vars?.tags || "").toLowerCase().includes(search) ||
-    (s.vars?.locale || "").toLowerCase().includes(search)
-  );
-
-  if (!filtered.length) {
-    browserTableBody.innerHTML = `
-      <tr><td colspan="5" class="muted">No servers match your search.</td></tr>
-    `;
-    return;
-  }
-
-  browserTableBody.innerHTML = "";
-
-  filtered.forEach(s => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${s.hostname}</td>
-      <td>${s.players?.length || 0}</td>
-      <td>${s.vars?.locale || "—"}</td>
-      <td>${s.vars?.tags || "—"}</td>
-      <td><button class="outline-btn small-btn" data-code="${s.joinId}">Join</button></td>
-    `;
-
-    tr.querySelector("button").onclick = () => {
-      window.open(`https://cfx.re/join/${s.joinId}`, "_blank");
-    };
-
-    browserTableBody.appendChild(tr);
-  });
-}
-
-browserRefresh.addEventListener("click", loadGlobalServers);
-
-browserSearch.addEventListener("input", () => {
-  if (browserTableBody.children.length > 0) {
-    loadGlobalServers();
-  }
-});
-
-// ===============================
-// SIDEBAR NAVIGATION
-// ===============================
-
-function switchView(view) {
-  sidebarItems.forEach(i => i.classList.remove("active"));
-  views.forEach(v => v.classList.remove("active"));
-
-  document.querySelector(`[data-view="${view}"]`).classList.add("active");
-  document.getElementById(`view-${view}`).classList.add("active");
-}
-
-sidebarItems.forEach(item => {
-  item.addEventListener("click", () => {
-    const view = item.dataset.view;
-    switchView(view);
-
-    if (view === "browser") loadGlobalServers();
-    if (view === "favorites") renderFavorites();
-    if (view === "history") renderHistory();
-  });
-});
-
-// ===============================
-// THEME
-// ===============================
-
-function initTheme() {
-  const saved = localStorage.getItem("cfxTheme");
-  if (saved === "light") {
-    document.body.classList.add("light");
-    themeToggle.textContent = "Light";
-  } else {
-    document.body.classList.remove("light");
-    themeToggle.textContent = "Dark";
-  }
-}
-
-themeToggle.addEventListener("click", () => {
-  const isLight = document.body.classList.toggle("light");
-  localStorage.setItem("cfxTheme", isLight ? "light" : "dark");
-  themeToggle.textContent = isLight ? "Light" : "Dark";
-});
-
-// ===============================
-// EVENTS + INIT
-// ===============================
-
-analyzeBtn.addEventListener("click", analyzeCFX);
-
-cfxInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") analyzeCFX();
-});
-
-initTheme();
-renderHistory();
-renderFavorites();
-setTopStatus("idle", "Idle");
