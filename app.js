@@ -1,3 +1,5 @@
+document.addEventListener("DOMContentLoaded", () => {
+
 /* ============================================================
    GLOBAL STATE
 ============================================================ */
@@ -312,3 +314,5 @@ async function fetchGeoIP(ip) {
     return "Unknown";
   }
 }
+
+}); // END DOMContentLoaded
