@@ -1,5 +1,5 @@
 // ===============================
-//  PREMIUM CFX FINDER LOGIC
+//  6KXD CFX FINDER – CYBER LUX
 // ===============================
 
 const cfxInput = document.getElementById("cfxInput");
@@ -16,6 +16,11 @@ const historyList = document.getElementById("historyList");
 const themeToggle = document.getElementById("themeToggle");
 const joinBtn = document.getElementById("joinBtn");
 const resultsPanel = document.getElementById("resultsPanel");
+const serverInfoList = document.getElementById("serverInfoList");
+
+const welcomeOverlay = document.getElementById("welcomeOverlay");
+const enterBtn = document.getElementById("enterBtn");
+const pageWrap = document.querySelector(".page-wrap");
 
 let currentCode = null;
 
@@ -56,7 +61,8 @@ function setLoadingState(isLoading) {
         serverBanner,
         serverEndpoints,
         serverResources,
-        playersList
+        playersList,
+        serverInfoList
     ];
 
     shimmerTargets.forEach(el => {
@@ -147,6 +153,40 @@ themeToggle.addEventListener("click", () => {
     themeToggle.textContent = isLight ? "Light" : "Dark";
 });
 
+// Info panel
+function renderInfoPanel(d, code) {
+    serverInfoList.innerHTML = "";
+
+    const vars = d.vars || {};
+
+    const infoItems = [
+        { label: "CFX Code", value: code || "Unknown" },
+        { label: "Game Build", value: vars.sv_enforceGameBuild || vars.gamebuild || "Unknown" },
+        { label: "Locale", value: vars.locale || "Unknown" },
+        { label: "Max Players", value: d.sv_maxclients || d.maxClients || d.maxplayers || "Unknown" },
+        { label: "Current Players", value: (d.players && d.players.length) || 0 },
+        { label: "Project Name", value: vars.sv_projectName || "N/A" },
+        { label: "Project Desc", value: vars.sv_projectDesc || "N/A" },
+        { label: "Tags", value: vars.tags || "N/A" }
+    ];
+
+    infoItems.forEach(item => {
+        const li = document.createElement("li");
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "label";
+        labelSpan.textContent = item.label;
+
+        const valueSpan = document.createElement("span");
+        valueSpan.className = "value";
+        valueSpan.textContent = String(item.value);
+
+        li.appendChild(labelSpan);
+        li.appendChild(valueSpan);
+        serverInfoList.appendChild(li);
+    });
+}
+
 // Main lookup
 async function analyzeCFX() {
     const raw = cfxInput.value.trim();
@@ -217,7 +257,7 @@ async function analyzeCFX() {
         // Resources
         serverResources.innerHTML = "";
         if (Array.isArray(d.resources) && d.resources.length) {
-            d.resources.slice(0, 30).forEach(r => {
+            d.resources.slice(0, 40).forEach(r => {
                 const li = document.createElement("li");
                 li.textContent = r;
                 serverResources.appendChild(li);
@@ -253,6 +293,9 @@ async function analyzeCFX() {
             playersList.appendChild(row);
         }
 
+        // Info panel
+        renderInfoPanel(d, code);
+
         // Join button
         joinBtn.disabled = false;
         joinBtn.onclick = () => {
@@ -267,7 +310,7 @@ async function analyzeCFX() {
         // History
         addToHistory(code, d.hostname || "Unknown");
 
-        // Slide panel slight lift
+        // Slide micro animation
         resultsPanel.style.transform = "translateY(-4px)";
         setTimeout(() => {
             resultsPanel.style.transform = "translateY(0)";
@@ -280,6 +323,17 @@ async function analyzeCFX() {
         setLoadingState(false);
     }
 }
+
+// Welcome screen logic (auto + click)
+function dismissWelcome() {
+    if (!welcomeOverlay.classList.contains("hidden")) {
+        welcomeOverlay.classList.add("hidden");
+        pageWrap.classList.add("visible");
+    }
+}
+
+enterBtn.addEventListener("click", dismissWelcome);
+setTimeout(dismissWelcome, 1500);
 
 // Events
 analyzeBtn.addEventListener("click", analyzeCFX);

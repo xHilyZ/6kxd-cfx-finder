@@ -8,6 +8,15 @@
 </head>
 <body>
 
+    <!-- Welcome Screen -->
+    <div id="welcomeOverlay" class="welcome-overlay">
+        <div class="welcome-card glass">
+            <h1>6KXD CFX Finder</h1>
+            <p class="welcome-sub">Premium Cyber Lookup System</p>
+            <button id="enterBtn" class="primary-btn">Enter</button>
+        </div>
+    </div>
+
     <div class="page-wrap">
 
         <header class="header glass">
@@ -15,7 +24,7 @@
                 <div class="brand-mark">6KXD</div>
                 <div class="brand-text">
                     <h1>CFX Finder</h1>
-                    <p>Fast • Clean • Neon</p>
+                    <p>Cyber‑Luxury Neon Lookup</p>
                 </div>
             </div>
             <button id="themeToggle" class="theme-toggle">Dark</button>
@@ -26,15 +35,24 @@
             <section class="card glass input-card">
                 <div class="input-header">
                     <div>
-                        <label for="cfxInput">Enter CFX Code</label>
+                        <label for="cfxInput">CFX Code</label>
                         <p class="hint">Paste a code or full cfx.re link</p>
                     </div>
                     <button id="analyzeBtn" class="primary-btn">Lookup</button>
                 </div>
                 <div class="input-row">
-                    <input id="cfxInput" type="text" placeholder="e.g. abc123">
+                    <input id="cfxInput" type="text" placeholder="e.g. mlk6k7">
                 </div>
                 <p id="statusText" class="status">Waiting for input…</p>
+            </section>
+
+            <section class="card glass info-card">
+                <div class="section-header">
+                    <h2>Server Info</h2>
+                </div>
+                <ul id="serverInfoList" class="info-list shimmer">
+                    <!-- Filled by JS -->
+                </ul>
             </section>
 
             <section class="card glass history-card">
@@ -93,7 +111,7 @@
         </main>
 
         <footer class="footer glass">
-            <p>Built for 6KXD • CFX Lookup • Minimal Neon Glass</p>
+            <p>Built for 6KXD • Cyber‑Luxury CFX Lookup</p>
         </footer>
 
     </div>

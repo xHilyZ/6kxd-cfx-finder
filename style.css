@@ -9,14 +9,15 @@
 
 :root {
     --bg: #05060a;
-    --bg-alt: #0b0d14;
-    --glass: rgba(15, 18, 30, 0.85);
-    --glass-soft: rgba(20, 24, 38, 0.9);
-    --border: rgba(255, 255, 255, 0.08);
+    --bg-alt: #070814;
+    --glass: rgba(10, 12, 24, 0.9);
+    --glass-soft: rgba(14, 16, 30, 0.95);
+    --border: rgba(255, 255, 255, 0.06);
     --text: #f5f7ff;
     --muted: #9aa0b8;
-    --accent: #4da3ff;
-    --accent-soft: rgba(77, 163, 255, 0.25);
+    --accent1: #4da3ff;
+    --accent2: #a855f7;
+    --accent-soft: rgba(77, 163, 255, 0.22);
     --danger: #ff4d6a;
     --success: #4dff88;
 }
@@ -25,11 +26,12 @@ body.light {
     --bg: #f4f6fb;
     --bg-alt: #e9edf7;
     --glass: rgba(255, 255, 255, 0.9);
-    --glass-soft: rgba(255, 255, 255, 0.95);
+    --glass-soft: rgba(255, 255, 255, 0.96);
     --border: rgba(0, 0, 0, 0.06);
     --text: #111320;
     --muted: #5b6075;
-    --accent: #2563eb;
+    --accent1: #2563eb;
+    --accent2: #7c3aed;
     --accent-soft: rgba(37, 99, 235, 0.18);
     --danger: #e11d48;
     --success: #16a34a;
@@ -41,13 +43,63 @@ body {
     min-height: 100vh;
 }
 
+/* Welcome overlay */
+
+.welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(77, 163, 255, 0.18), rgba(0, 0, 0, 0.96));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.welcome-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.welcome-card {
+    max-width: 360px;
+    text-align: center;
+    padding: 22px 20px 18px;
+    border-radius: 18px;
+    border-image: linear-gradient(135deg, var(--accent1), var(--accent2)) 1;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.welcome-card h1 {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+}
+
+.welcome-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+/* Layout */
+
 .page-wrap {
-    max-width: 1100px;
+    max-width: 1120px;
     margin: 0 auto;
     padding: 24px 16px 32px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.page-wrap.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .header {
@@ -55,6 +107,17 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    inset: auto 12px 0 12px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent1), var(--accent2), transparent);
+    opacity: 0.6;
 }
 
 .brand {
@@ -67,7 +130,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: radial-gradient(circle at top, #4da3ff, #111320);
+    background: radial-gradient(circle at top, var(--accent1), #111320);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,7 +140,7 @@ body {
 }
 
 .brand-text h1 {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     font-weight: 600;
 }
 
@@ -99,7 +162,7 @@ body {
 
 .theme-toggle:hover {
     background: var(--accent-soft);
-    border-color: var(--accent);
+    border-color: var(--accent1);
 }
 
 .main {
@@ -116,9 +179,9 @@ body {
 
 .glass {
     background: var(--glass);
-    border-radius: 16px;
+    border-radius: 18px;
     border: 1px solid var(--border);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(20px);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
@@ -131,6 +194,8 @@ body {
 .card {
     padding: 18px 18px 16px;
 }
+
+/* Input */
 
 .input-card {
     display: flex;
@@ -176,6 +241,8 @@ input::placeholder {
     color: var(--muted);
 }
 
+/* Buttons */
+
 .primary-btn,
 .outline-btn {
     padding: 10px 16px;
@@ -191,7 +258,7 @@ input::placeholder {
 }
 
 .primary-btn {
-    background: linear-gradient(135deg, var(--accent), #7dd3fc);
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
     border: none;
     color: #0b1020;
     box-shadow: 0 0 18px rgba(77, 163, 255, 0.55);
@@ -204,8 +271,8 @@ input::placeholder {
 
 .outline-btn {
     background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    border: 1px solid var(--accent1);
+    color: var(--accent1);
 }
 
 .outline-btn:disabled {
@@ -214,15 +281,14 @@ input::placeholder {
     box-shadow: none;
 }
 
+/* Status */
+
 .status {
     font-size: 0.85rem;
     color: var(--muted);
 }
 
-.history-card {
-    max-height: 220px;
-    overflow: hidden;
-}
+/* Info + history */
 
 .section-header {
     display: flex;
@@ -236,9 +302,45 @@ input::placeholder {
     font-weight: 500;
 }
 
+.info-card {
+    max-height: 220px;
+    overflow: hidden;
+}
+
+.info-list {
+    list-style: none;
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.info-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.8rem;
+    padding: 5px 7px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 4px;
+}
+
+.info-list span.label {
+    color: var(--muted);
+}
+
+.info-list span.value {
+    text-align: right;
+}
+
+.history-card {
+    max-height: 220px;
+    overflow: hidden;
+}
+
 .history-list {
     list-style: none;
-    max-height: 170px;
+    max-height: 180px;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -264,6 +366,8 @@ input::placeholder {
     background: rgba(255, 255, 255, 0.04);
 }
 
+/* Results */
+
 .results-panel {
     position: relative;
     padding: 14px 16px 16px;
@@ -275,8 +379,9 @@ input::placeholder {
     width: 60px;
     height: 4px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
     margin: 0 auto 10px;
+    opacity: 0.7;
 }
 
 .results-header {
@@ -378,6 +483,8 @@ input::placeholder {
     font-size: 0.75rem;
 }
 
+/* Footer */
+
 .footer {
     margin-top: 10px;
     padding: 10px 14px;
@@ -386,7 +493,7 @@ input::placeholder {
     color: var(--muted);
 }
 
-/* Shimmer loading */
+/* Shimmer */
 
 .shimmer.loading {
     position: relative;
