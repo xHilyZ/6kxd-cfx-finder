@@ -141,7 +141,7 @@ document.getElementById("resourceSort").addEventListener("click", () => {
 });
 
 // ===============================
-// GLOBAL SERVER SEARCH (FIXED)
+// GLOBAL SERVER SEARCH (AU‑ONLY)
 // ===============================
 const globalInput = document.getElementById("globalSearchInput");
 const serverBrowser = document.getElementById("serverBrowser");
@@ -178,9 +178,14 @@ globalInput.addEventListener("input", () => {
     return;
   }
 
-  const matches = allServers.filter(s =>
-    s.Data?.hostname?.toLowerCase().includes(term)
-  );
+  const matches = allServers.filter(s => {
+    const nameMatch = s.Data?.hostname?.toLowerCase().includes(term);
+    const isAU =
+      s.Data?.vars?.country === "AU" ||
+      s.Data?.locale === "en-AU";
+
+    return nameMatch && isAU;
+  });
 
   serverResults.innerHTML = "";
 
