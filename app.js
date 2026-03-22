@@ -31,8 +31,6 @@ function setStatus(state) {
 // ===============================
 function renderPlayerCards(players) {
   const listContainer = document.getElementById("fullPlayers");
-  const statPlayers = document.getElementById("statPlayers");
-
   listContainer.innerHTML = "";
   fullPlayers = players;
 
@@ -60,7 +58,6 @@ function renderPlayerCards(players) {
 // ===============================
 function renderResourceChips(resources) {
   const listContainer = document.getElementById("fullResources");
-
   listContainer.innerHTML = "";
   fullResources = resources;
 
@@ -88,7 +85,6 @@ document.getElementById("closePanel").addEventListener("click", () => {
 const nameInput = document.getElementById("globalSearchInput");
 const nameSearchBtn = document.getElementById("globalSearchBtn");
 
-// AU IP ranges
 const AU_IPS = [
   "139.99.", "103.212.", "51.79.", "54.206.",
   "43.229.", "103.1.", "45.248."
@@ -123,6 +119,13 @@ async function searchServerByName() {
     const best = auServers.sort((a, b) =>
       (b.Data.players?.length || 0) - (a.Data.players?.length || 0)
     )[0];
+
+    // ⭐ FIX: Validate CFX code before loading
+    if (!best.EndPoint || best.EndPoint.length < 6) {
+      setStatus("offline");
+      document.getElementById("statusText").textContent = "Server not publicly listed";
+      return;
+    }
 
     document.getElementById("cfxInput").value = best.EndPoint;
     analyzeCFX();
