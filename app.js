@@ -195,7 +195,7 @@ function renderInfoPanel(d, code) {
 }
 
 // ===============================
-// MAIN LOOKUP (NOW USING PROXY)
+// MAIN LOOKUP (WITH PROXY)
 // ===============================
 async function analyzeCFX() {
     const raw = cfxInput.value.trim();
@@ -247,9 +247,12 @@ async function analyzeCFX() {
             (d.vars && (d.vars.banner_connecting || d.vars.banner_detail)) || null;
 
         if (bannerUrl) {
+            serverBanner.onload = () => serverBanner.classList.add("loaded");
             serverBanner.src = bannerUrl;
             serverBanner.style.display = "block";
-        } else serverBanner.style.display = "none";
+        } else {
+            serverBanner.style.display = "none";
+        }
 
         // Endpoints
         serverEndpoints.innerHTML = "";
