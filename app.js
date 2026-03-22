@@ -8,10 +8,12 @@ let autoRefreshTimer = null;
    PAGE DETECTION
 ============================================================ */
 
-const isHome = window.location.pathname.includes("index.html") || window.location.pathname === "/";
 const path = window.location.pathname.toLowerCase();
+const isHome =
+  path.endsWith("/") ||
+  path.endsWith("/index.html") ||
+  path.includes("index");
 const isServer = path.includes("server");
-
 
 /* ============================================================
    HOMEPAGE LOGIC
@@ -108,15 +110,32 @@ async function loadServerInfo(cfx) {
   try {
     const res = await fetch(url);
     const data = await res.json();
+
+    if (!data || !data.Data) {
+      alert("Invalid CFX code or server not found.");
+      return;
+    }
+
     const d = data.Data;
 
+    /* ------------------------------
+       BASIC INFO
+    ------------------------------ */
     document.getElementById("serverName").textContent = d.hostname;
-    document.getElementById("serverIP").textContent = d.connectEndPoints?.[0] || "Unknown";
+    document.getElementById("serverIP").textContent =
+      d.connectEndPoints?.[0] || "Unknown";
 
     const isOnline = d.online;
-    document.getElementById("serverStatusText").textContent = isOnline ? "Online" : "Offline";
-    document.getElementById("serverStatusDot").style.background = isOnline ? "#00d26a" : "#ff4d4d";
+    document.getElementById("serverStatusText").textContent = isOnline
+      ? "Online"
+      : "Offline";
+    document.getElementById("serverStatusDot").style.background = isOnline
+      ? "#00d26a"
+      : "#ff4d4d";
 
+    /* ------------------------------
+       BANNER
+    ------------------------------ */
     if (d.vars?.banner_detail) {
       document.getElementById("serverBanner").src = d.vars.banner_detail;
       document.getElementById("serverBannerWrap").style.display = "block";
@@ -124,22 +143,45 @@ async function loadServerInfo(cfx) {
       document.getElementById("serverBannerWrap").style.display = "none";
     }
 
-    document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
-    document.getElementById("statResources").textContent = d.resources.length;
-    document.getElementById("statBuild").textContent = d.vars?.sv_enforceGameBuild || "Unknown";
+    /* ------------------------------
+       STATS
+    ------------------------------ */
+    document.getElementById("statPlayers").textContent =
+      `${d.clients} / ${d.sv_maxclients}`;
+    document.getElementById("statResources").textContent =
+      d.resources?.length || 0;
+    document.getElementById("statBuild").textContent =
+      d.vars?.sv_enforceGameBuild || "Unknown";
 
+    /* ------------------------------
+       GEOIP (SAFE)
+    ------------------------------ */
     const ip = (d.connectEndPoints?.[0] || "").split(":")[0];
-    document.getElementById("statLocale").textContent = await fetchGeoIP(ip);
 
+    document.getElementById("statLocale").textContent =
+      ip ? await fetchGeoIP(ip) : "Unknown";
+
+    /* ------------------------------
+       JSON BUTTONS
+    ------------------------------ */
     document.getElementById("playersJson").onclick = () =>
-      window.open(`https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`, "_blank");
+      window.open(
+        `https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`,
+        "_blank"
+      );
 
     document.getElementById("infoJson").onclick = () =>
       window.open(url, "_blank");
 
+    /* ------------------------------
+       FULL PANEL
+    ------------------------------ */
     document.getElementById("openFullPanel").onclick = () =>
       openFullPanel(d);
 
+    /* ------------------------------
+       AUTO REFRESH
+    ------------------------------ */
     setupAutoRefresh(cfx);
 
   } catch (err) {
@@ -154,6 +196,8 @@ async function loadServerInfo(cfx) {
 
 function setupAutoRefresh(cfx) {
   const select = document.getElementById("autoRefreshSelect");
+
+  if (!select) return;
 
   select.onchange = () => {
     stopAutoRefresh();
@@ -181,8 +225,8 @@ function openFullPanel(data) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("fullPanel").style.display = "block";
 
-  loadFullPlayers(data.players);
-  loadFullResources(data.resources);
+  loadFullPlayers(data.players || []);
+  loadFullResources(data.resources || []);
 
   document.getElementById("closePanel").onclick = closeFullPanel;
 }
@@ -231,7 +275,9 @@ async function fetchGeoIP(ip) {
     const data = await res.json();
 
     const flag = data.country
-      ? String.fromCodePoint(...[...data.country].map(c => 127397 + c.charCodeAt()))
+      ? String.fromCodePoint(
+          ...[...data.country].map(c => 127397 + c.charCodeAt())
+        )
       : "";
 
     return `${data.country_name || "Unknown"} ${flag}`;
