@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CFX Finder • Cyber-Luxury Neon Lookup</title>
+  <title>CFX Finder • 6KXD Cyber-Lux Lookup</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -64,6 +64,7 @@
             <span>Uptime</span>
             <strong id="uptimeText">—</strong>
           </div>
+          <div id="topStatus" class="status-pill status-idle">Idle</div>
           <button id="themeToggle" class="theme-toggle">Dark</button>
         </div>
       </header>
@@ -73,7 +74,7 @@
         <!-- Lookup view -->
         <section class="view active" id="view-lookup">
           <div class="main-grid">
-            <!-- Left column: input + info + history -->
+            <!-- Left column: input + server info + history -->
             <div class="left-column">
               <div class="card glass input-card">
                 <div class="input-header">
@@ -89,21 +90,18 @@
                 </div>
               </div>
 
-              <div class="card glass-soft info-history-wrap">
-                <div class="info-history-grid">
-                  <div class="info-card">
-                    <div class="section-header">
-                      <h2>Server Info ℹ️</h2>
-                    </div>
-                    <ul id="serverInfoList" class="info-list"></ul>
-                  </div>
-                  <div class="history-card">
-                    <div class="section-header">
-                      <h2>Recent Lookups</h2>
-                    </div>
-                    <ul id="historyList" class="history-list"></ul>
-                  </div>
+              <div class="card glass-soft info-card-big">
+                <div class="section-header">
+                  <h2>Server Info ℹ️</h2>
                 </div>
+                <ul id="serverInfoList" class="info-list-big"></ul>
+              </div>
+
+              <div class="card glass-soft">
+                <div class="section-header">
+                  <h2>Recent Lookups</h2>
+                </div>
+                <ul id="historyList" class="history-list"></ul>
               </div>
             </div>
 
@@ -129,33 +127,38 @@
                   <img id="serverBanner" class="server-banner shimmer loading" style="display:none;" />
                 </div>
 
-                <!-- Endpoints under banner -->
+                <!-- Endpoints -->
                 <div class="panel glass-soft endpoints-panel">
                   <h3>Endpoints</h3>
                   <ul id="serverEndpoints" class="small-list"></ul>
                 </div>
 
-                <!-- Resources + Players grid -->
-                <div class="results-grid-2">
-                  <!-- RESOURCES LEFT -->
-                  <div class="panel glass-soft resources-panel">
+                <!-- PLAYERS FULL WIDTH -->
+                <div class="panel glass-soft players-panel-full">
+                  <div class="panel-header">
+                    <h3>Players 👥</h3>
+                    <input id="playerSearch" class="pill-search" type="text" placeholder="🔍" />
+                  </div>
+                  <div id="playersList" class="players-list"></div>
+                </div>
+
+                <!-- RESOURCES FULL WIDTH -->
+                <div class="panel glass-soft resources-panel-full">
+                  <div class="panel-header">
                     <h3>Resources 📦</h3>
-                    <div class="resource-tabs">
-                      <button class="resource-tab active" data-cat="gameplay">Gameplay</button>
-                      <button class="resource-tab" data-cat="interface">Interface</button>
-                      <button class="resource-tab" data-cat="vehicles">Vehicles</button>
-                      <button class="resource-tab" data-cat="maps">Maps</button>
-                      <button class="resource-tab" data-cat="scripts">Scripts</button>
-                      <button class="resource-tab" data-cat="others">Others</button>
-                    </div>
-                    <ul id="serverResources" class="small-list"></ul>
+                    <input id="resourceSearch" class="pill-search" type="text" placeholder="🔍" />
                   </div>
 
-                  <!-- PLAYERS RIGHT -->
-                  <div class="panel glass-soft players-panel">
-                    <h3>Players 👥</h3>
-                    <div id="playersList" class="players-list"></div>
+                  <div class="resource-tabs">
+                    <button class="resource-tab active" data-cat="gameplay">Gameplay</button>
+                    <button class="resource-tab" data-cat="interface">Interface</button>
+                    <button class="resource-tab" data-cat="vehicles">Vehicles</button>
+                    <button class="resource-tab" data-cat="maps">Maps</button>
+                    <button class="resource-tab" data-cat="scripts">Scripts</button>
+                    <button class="resource-tab" data-cat="others">Others</button>
                   </div>
+
+                  <ul id="serverResources" class="small-list"></ul>
                 </div>
               </div>
 

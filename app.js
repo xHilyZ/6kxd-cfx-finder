@@ -6,6 +6,8 @@
 const cfxInput = document.getElementById("cfxInput");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const statusText = document.getElementById("statusText");
+const topStatus = document.getElementById("topStatus");
+
 const serverName = document.getElementById("serverName");
 const serverPlayers = document.getElementById("serverPlayers");
 const serverIcon = document.getElementById("serverIcon");
@@ -17,6 +19,9 @@ const serverInfoList = document.getElementById("serverInfoList");
 const joinBtn = document.getElementById("joinBtn");
 const favoriteBtn = document.getElementById("favoriteBtn");
 const uptimeText = document.getElementById("uptimeText");
+
+const playerSearch = document.getElementById("playerSearch");
+const resourceSearch = document.getElementById("resourceSearch");
 
 const historyList = document.getElementById("historyList");
 const historyListFull = document.getElementById("historyListFull");
@@ -38,28 +43,45 @@ const themeToggle = document.getElementById("themeToggle");
 let currentCode = null;
 let currentServerData = null;
 let currentResources = [];
+let currentPlayers = [];
 let favorites = loadFavorites();
 
 // ===============================
 // STATUS + HELPERS
 // ===============================
 
+function setTopStatus(type, message) {
+  topStatus.textContent = message;
+
+  topStatus.classList.remove(
+    "status-online",
+    "status-offline",
+    "status-loading",
+    "status-idle"
+  );
+
+  if (type === "online") topStatus.classList.add("status-online");
+  else if (type === "offline") topStatus.classList.add("status-offline");
+  else if (type === "loading") topStatus.classList.add("status-loading");
+  else topStatus.classList.add("status-idle");
+}
+
 function setStatus(type, message) {
   statusText.textContent = message;
   document.getElementById("sidebarStatus").textContent = message;
 
-  switch (type) {
-    case "loading":
-      statusText.style.color = "#4da3ff";
-      break;
-    case "online":
-      statusText.style.color = "#4dff88";
-      break;
-    case "offline":
-      statusText.style.color = "#ff4d6a";
-      break;
-    default:
-      statusText.style.color = "var(--muted)";
+  if (type === "loading") {
+    statusText.style.color = "#4da3ff";
+    setTopStatus("loading", "Checking…");
+  } else if (type === "online") {
+    statusText.style.color = "#4dff88";
+    setTopStatus("online", "Online");
+  } else if (type === "offline") {
+    statusText.style.color = "#ff4d6a";
+    setTopStatus("offline", "Offline");
+  } else {
+    statusText.style.color = "var(--muted)";
+    setTopStatus("idle", "Idle");
   }
 }
 
@@ -253,12 +275,16 @@ function renderResources(category) {
   const cats = categorizeResources(currentResources);
   const list = cats[category] || [];
 
-  if (!list.length) {
-    serverResources.innerHTML = "<li>No resources in this category.</li>";
+  const searchTerm = resourceSearch.value.toLowerCase();
+
+  const filtered = list.filter(r => r.toLowerCase().includes(searchTerm));
+
+  if (!filtered.length) {
+    serverResources.innerHTML = "<li>No matching resources.</li>";
     return;
   }
 
-  list.forEach(r => {
+  filtered.forEach(r => {
     const li = document.createElement("li");
     li.textContent = r;
     serverResources.appendChild(li);
@@ -272,12 +298,19 @@ function renderResources(category) {
 function renderPlayers(players) {
   playersList.innerHTML = "";
 
-  if (!players || !players.length) {
-    playersList.innerHTML = "<div class='player-row'>No players online.</div>";
+  const searchTerm = playerSearch.value.toLowerCase();
+
+  const filtered = players.filter(p =>
+    p.name?.toLowerCase().includes(searchTerm) ||
+    String(p.id).includes(searchTerm)
+  );
+
+  if (!filtered.length) {
+    playersList.innerHTML = "<div class='player-row'>No matching players.</div>";
     return;
   }
 
-  players.forEach(p => {
+  filtered.forEach(p => {
     const row = document.createElement("div");
     row.className = "player-row";
 
@@ -434,7 +467,8 @@ async function analyzeCFX() {
     renderResources("gameplay");
 
     // Players
-    renderPlayers(d.players || []);
+    currentPlayers = d.players || [];
+    renderPlayers(currentPlayers);
 
     // Info panel
     renderInfoPanel(d, code);
@@ -465,6 +499,19 @@ async function analyzeCFX() {
     setLoadingState(false);
   }
 }
+
+// ===============================
+// SEARCH LISTENERS
+// ===============================
+
+playerSearch.addEventListener("input", () => {
+  renderPlayers(currentPlayers);
+});
+
+resourceSearch.addEventListener("input", () => {
+  const activeTab = document.querySelector(".resource-tab.active");
+  renderResources(activeTab.dataset.cat);
+});
 
 // ===============================
 // GLOBAL SERVER BROWSER
@@ -617,3 +664,4 @@ cfxInput.addEventListener("keypress", e => {
 initTheme();
 renderHistory();
 renderFavorites();
+setTopStatus("idle", "Idle");
