@@ -1,4 +1,10 @@
 /* ============================================================
+   GLOBALS
+============================================================ */
+
+let autoRefreshTimer = null;
+
+/* ============================================================
    PAGE DETECTION
 ============================================================ */
 
@@ -93,8 +99,6 @@ if (isServer) {
     loadServerInfo(cfx);
   }
 }
-
-let autoRefreshTimer = null;
 
 async function loadServerInfo(cfx) {
   stopAutoRefresh();
