@@ -120,7 +120,7 @@ async function loadServerInfo(cfx) {
     const vars = d.vars || {};
 
     /* ------------------------------
-       ONLINE STATUS (FINAL FIX)
+       ONLINE STATUS (FIXED)
     ------------------------------ */
     const isOnline = (d.clients > 0) || d.online;
 
@@ -159,14 +159,14 @@ async function loadServerInfo(cfx) {
       String(vars.sv_enforceGameBuild || "Unknown");
 
     /* ------------------------------
-       GEOIP (SAFE)
+       GEOIP
     ------------------------------ */
     const ip = (d.connectEndPoints?.[0] || "").split(":")[0];
     document.getElementById("statLocale").textContent =
       ip ? await fetchGeoIP(ip) : "Unknown";
 
     /* ------------------------------
-       SAFE STRINGS (NO CRASHES)
+       SAFE STRINGS
     ------------------------------ */
     document.getElementById("serverDesc").textContent =
       String(vars.sv_projectDesc || "");
@@ -178,13 +178,10 @@ async function loadServerInfo(cfx) {
       String(vars.country || "Unknown");
 
     /* ------------------------------
-       JSON BUTTONS
+       JSON BUTTONS (FIXED)
     ------------------------------ */
     document.getElementById("playersJson").onclick = () =>
-      window.open(
-        `https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`,
-        "_blank"
-      );
+      window.open(url, "_blank");
 
     document.getElementById("infoJson").onclick = () =>
       window.open(url, "_blank");
@@ -241,8 +238,11 @@ function openFullPanel(data) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("fullPanel").style.display = "block";
 
-  loadFullPlayers(Array.isArray(data.players) ? data.players : []);
-  loadFullResources(Array.isArray(data.resources) ? data.resources : []);
+  const players = Array.isArray(data.players) ? data.players : [];
+  const resources = Array.isArray(data.resources) ? data.resources : [];
+
+  loadFullPlayers(players);
+  loadFullResources(resources);
 
   document.getElementById("closePanel").onclick = closeFullPanel;
 }
