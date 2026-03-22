@@ -33,7 +33,6 @@ function renderPlayerCards(players) {
   const listContainer = document.getElementById("fullPlayers");
   const statPlayers = document.getElementById("statPlayers");
 
-  statPlayers.textContent = players.length;
   listContainer.innerHTML = "";
   fullPlayers = players;
 
@@ -60,10 +59,8 @@ function renderPlayerCards(players) {
 // RESOURCE CHIP RENDERING
 // ===============================
 function renderResourceChips(resources) {
-  const statResources = document.getElementById("statResources");
   const listContainer = document.getElementById("fullResources");
 
-  statResources.textContent = resources.length;
   listContainer.innerHTML = "";
   fullResources = resources;
 
@@ -75,17 +72,14 @@ function renderResourceChips(resources) {
 // ===============================
 // FULL PANEL OPEN/CLOSE
 // ===============================
-const overlay = document.getElementById("overlay");
-const fullPanel = document.getElementById("fullPanel");
-
 document.getElementById("openFullPanel").addEventListener("click", () => {
-  overlay.classList.add("show");
-  fullPanel.classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("fullPanel").classList.add("open");
 });
 
 document.getElementById("closePanel").addEventListener("click", () => {
-  overlay.classList.remove("show");
-  fullPanel.classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("fullPanel").classList.remove("open");
 });
 
 // ===============================
@@ -100,10 +94,7 @@ const AU_IPS = [
   "43.229.", "103.1.", "45.248."
 ];
 
-// Search button click
 nameSearchBtn.addEventListener("click", searchServerByName);
-
-// Enter key support
 nameInput.addEventListener("keypress", e => {
   if (e.key === "Enter") searchServerByName();
 });
@@ -118,7 +109,6 @@ async function searchServerByName() {
     const res = await fetch(`https://servers-frontend.fivem.net/api/servers/search?q=${term}`);
     const json = await res.json();
 
-    // AU-only filter
     const auServers = json.filter(s => {
       const endpoints = s.Data?.connectEndPoints || [];
       return endpoints.some(ip => AU_IPS.some(prefix => ip.startsWith(prefix)));
@@ -130,12 +120,10 @@ async function searchServerByName() {
       return;
     }
 
-    // Pick highest player count
     const best = auServers.sort((a, b) =>
       (b.Data.players?.length || 0) - (a.Data.players?.length || 0)
     )[0];
 
-    // Load server info
     document.getElementById("cfxInput").value = best.EndPoint;
     analyzeCFX();
 
@@ -153,7 +141,6 @@ async function analyzeCFX() {
   if (!input) return;
 
   setStatus("loading");
-  document.getElementById("greeting").style.display = "none";
 
   const codeMatch = input.match(/[a-zA-Z0-9]{6,}/);
   if (!codeMatch) {
@@ -165,93 +152,38 @@ async function analyzeCFX() {
 
   try {
     const res = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${code}`);
-    if (!res.ok) throw new Error();
-
     const data = await res.json();
     const d = data.Data;
 
-    // ===============================
-    // RESTARTING SERVER DETECTION
-    // ===============================
     const isRestarting =
-      d &&
-      !d.online &&
-      (!d.connectEndPoints || d.connectEndPoints.length === 0) &&
-      d.hostname;
+      d && !d.online &&
+      (!d.connectEndPoints || d.connectEndPoints.length === 0);
 
     if (isRestarting) {
       setStatus("offline");
       document.getElementById("statusText").textContent = "Server restarting";
-
-      document.getElementById("serverName").textContent = d.hostname;
-      document.getElementById("serverIP").textContent = "Restarting...";
-
-      let banner =
-        d.banner_connecting ||
-        d.banner_detail ||
-        d.icon ||
-        d.vars?.banner_connecting ||
-        d.vars?.banner_detail ||
-        null;
-
-      if (banner) {
-        document.getElementById("serverBannerWrap").style.display = "block";
-        document.getElementById("serverBanner").src = banner;
-      }
-
-      document.getElementById("statBuild").textContent = d.server || "N/A";
-      document.getElementById("statLocale").textContent = d.locale || "N/A";
-
-      renderPlayerCards([]);
-      renderResourceChips([]);
-
-      document.getElementById("serverInfo").style.display = "flex";
       return;
     }
 
-    // ===============================
-    // NORMAL ONLINE SERVER
-    // ===============================
-    document.getElementById("serverName").textContent = d.hostname || "Unknown Server";
+    document.getElementById("serverName").textContent = d.hostname;
     setStatus("online");
 
-    const ip = d.connectEndPoints?.[0] || "Hidden";
-    document.getElementById("serverIP").textContent = `IP: ${ip}`;
+    document.getElementById("serverIP").textContent =
+      d.connectEndPoints?.[0] || "Hidden";
 
-    if (d.icon) {
-      document.getElementById("serverIcon").style.backgroundImage = `url(${d.icon})`;
-    }
-
-    let banner =
-      d.banner_connecting ||
-      d.banner_detail ||
-      d.icon ||
-      d.vars?.banner_connecting ||
-      d.vars?.banner_detail ||
-      null;
-
-    if (banner) {
+    if (d.banner_connecting || d.banner_detail || d.icon) {
       document.getElementById("serverBannerWrap").style.display = "block";
-      document.getElementById("serverBanner").src = banner;
-    } else {
-      document.getElementById("serverBannerWrap").style.display = "none";
+      document.getElementById("serverBanner").src =
+        d.banner_connecting || d.banner_detail || d.icon;
     }
 
-    document.getElementById("statBuild").textContent = d.server || "N/A";
-    document.getElementById("statLocale").textContent = d.locale || "N/A";
+    document.getElementById("statBuild").textContent = d.server;
+    document.getElementById("statLocale").textContent = d.locale;
 
     renderPlayerCards(d.players || []);
     renderResourceChips(d.resources || []);
 
-    document.getElementById("serverDesc").textContent = d.vars?.sv_projectDesc || "";
-    document.getElementById("serverLoc").textContent = d.vars?.locale || "";
-
-    if (d.vars?.country) {
-      document.getElementById("serverCountry").textContent = `Country: ${d.vars.country}`;
-    }
-
-    document.getElementById("serverInfo").style.display = "flex";
-    document.getElementById("openFullPanel").style.display = "block";
+    document.getElementById("serverInfo").style.display = "block";
 
   } catch (err) {
     console.error(err);
