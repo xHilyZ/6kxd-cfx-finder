@@ -12,6 +12,16 @@
     <h2 class="centered-title">6kxd CFX Finder</h2>
   </header>
 
+  <!-- GLOBAL SERVER SEARCH -->
+  <div class="global-search glass">
+    <input id="globalSearchInput" type="text" placeholder="Search all servers...">
+  </div>
+
+  <!-- SLIDE-DOWN SERVER BROWSER -->
+  <div id="serverBrowser" class="server-browser glass">
+    <div id="serverResults"></div>
+  </div>
+
   <div class="container">
 
     <!-- SEARCH AREA -->
@@ -21,15 +31,6 @@
     <div class="input-card glass">
       <input id="cfxInput" type="text" placeholder="Paste CFX link, IP:PORT, or any message containing a code">
       <button id="analyzeBtn" class="btn-primary">Analyze</button>
-    </div>
-
-    <!-- RECENT LOOKUPS -->
-    <div id="recentLookups" class="recent-lookups glass" style="display:none;">
-      <div class="recent-header">
-        <span>Recent Lookups</span>
-        <button id="clearRecent" class="btn-link">Clear</button>
-      </div>
-      <div id="recentList" class="recent-list"></div>
     </div>
 
     <!-- STATUS BAR -->
@@ -91,17 +92,10 @@
       </div>
     </div>
 
-    <!-- JSON BUTTONS -->
-    <div class="json-buttons" id="jsonButtons" style="display:none;">
-      <button id="playersJson" class="btn-secondary">Players JSON</button>
-      <button id="infoJson" class="btn-secondary">Server Info JSON</button>
-    </div>
-
     <button id="openFullPanel" class="btn-primary full-btn" style="display:none;">
       View Full Player & Resource Lists
     </button>
 
-    <pre id="jsonOutput" class="json-output glass" style="display:none;"></pre>
   </div>
 
   <!-- OVERLAY -->
@@ -111,21 +105,18 @@
   <div id="fullPanel" class="full-panel glass">
     <div class="full-panel-content">
 
-      <!-- STICKY CLOSE BUTTON -->
       <button id="closePanel" class="close-btn">Close Panel</button>
 
       <h2 class="panel-title">Server Data Details</h2>
 
       <div class="panel-grid">
 
-        <!-- PLAYERS PANEL -->
         <div>
           <h3 class="panel-heading">Online Players</h3>
-          <input id="playerSearch" class="panel-search" type="text" placeholder="Search players by name, ID, or ping">
+          <input id="playerSearch" class="panel-search" type="text" placeholder="Search players...">
           <div id="fullPlayers"></div>
         </div>
 
-        <!-- RESOURCES PANEL -->
         <div>
           <h3 class="panel-heading">Resources List</h3>
 
@@ -142,7 +133,6 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer class="footer glass">
     <span>Built by 6kxd | Powered by CFX.re</span>
   </footer>

@@ -5,6 +5,8 @@ let fullPlayers = [];
 let fullResources = [];
 let sortAZ = false;
 
+let allServers = []; // for global search
+
 // ===============================
 // STATUS BAR
 // ===============================
@@ -139,6 +141,78 @@ document.getElementById("resourceSort").addEventListener("click", () => {
 });
 
 // ===============================
+// GLOBAL SERVER SEARCH (NEW)
+// ===============================
+const globalInput = document.getElementById("globalSearchInput");
+const serverBrowser = document.getElementById("serverBrowser");
+const serverResults = document.getElementById("serverResults");
+
+// Load all servers once
+async function loadAllServers() {
+  try {
+    const res = await fetch("https://servers-frontend.fivem.net/api/servers/");
+    const data = await res.json();
+    allServers = data;
+  } catch (err) {
+    console.error("Failed to load server list", err);
+  }
+}
+
+loadAllServers();
+
+// Live search
+globalInput.addEventListener("input", () => {
+  const term = globalInput.value.toLowerCase();
+
+  if (term.length < 2) {
+    serverBrowser.style.display = "none";
+    return;
+  }
+
+  const matches = allServers.filter(s =>
+    s.Data?.hostname?.toLowerCase().includes(term)
+  );
+
+  serverResults.innerHTML = "";
+
+  matches.slice(0, 25).forEach(s => {
+    const icon = s.Data.icon || "";
+    const name = s.Data.hostname || "Unknown";
+    const players = s.Data.players?.length || 0;
+    const code = s.EndPoint;
+
+    serverResults.innerHTML += `
+      <div class="server-row" data-code="${code}">
+        <div class="server-row-icon" style="background-image:url('${icon}')"></div>
+        <div class="server-row-name">${name}</div>
+        <div class="server-row-players">${players} players</div>
+      </div>
+    `;
+  });
+
+  serverBrowser.style.display = "block";
+});
+
+// Click → load server
+serverResults.addEventListener("click", e => {
+  const row = e.target.closest(".server-row");
+  if (!row) return;
+
+  const code = row.dataset.code;
+
+  document.getElementById("cfxInput").value = code;
+  serverBrowser.style.display = "none";
+  analyzeCFX();
+});
+
+// Hide when clicking outside
+document.addEventListener("click", e => {
+  if (!serverBrowser.contains(e.target) && e.target !== globalInput) {
+    serverBrowser.style.display = "none";
+  }
+});
+
+// ===============================
 // MAIN FETCH FUNCTION
 // ===============================
 async function analyzeCFX() {
@@ -219,7 +293,6 @@ async function analyzeCFX() {
 
     // SHOW UI
     document.getElementById("serverInfo").style.display = "flex";
-    document.getElementById("jsonButtons").style.display = "flex";
     document.getElementById("openFullPanel").style.display = "block";
 
   } catch (err) {
