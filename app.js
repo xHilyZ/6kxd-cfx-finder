@@ -167,14 +167,14 @@ function renderInfoPanel(d, code) {
     const vars = d.vars || {};
 
     const infoItems = [
-        { label: "CFX Code", value: code },
-        { label: "Game Build", value: vars.sv_enforceGameBuild || vars.gamebuild || "Unknown" },
-        { label: "Locale", value: vars.locale || "Unknown" },
-        { label: "Max Players", value: d.sv_maxclients || d.maxClients || d.maxplayers || "Unknown" },
-        { label: "Current Players", value: (d.players && d.players.length) || 0 },
-        { label: "Project Name", value: vars.sv_projectName || "N/A" },
-        { label: "Project Desc", value: vars.sv_projectDesc || "N/A" },
-        { label: "Tags", value: vars.tags || "N/A" }
+        { label: "CFX Code:", value: code },
+        { label: "Game Build:", value: vars.sv_enforceGameBuild || vars.gamebuild || "Unknown" },
+        { label: "Locale:", value: vars.locale || "Unknown" },
+        { label: "Max Players:", value: d.sv_maxclients || d.maxClients || d.maxplayers || "Unknown" },
+        { label: "Current Players:", value: (d.players && d.players.length) || 0 },
+        { label: "Project Name:", value: vars.sv_projectName || "N/A" },
+        { label: "Project Desc:", value: vars.sv_projectDesc || "N/A" },
+        { label: "Tags:", value: vars.tags || "N/A" }
     ];
 
     infoItems.forEach(item => {
