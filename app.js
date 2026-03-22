@@ -246,22 +246,58 @@ async function analyzeCFX() {
     const data = await res.json();
     const d = data.Data;
 
-    // NAME
-    document.getElementById("serverName").textContent = d.hostname || "Unknown Server";
+    // ===============================
+    // RESTARTING SERVER DETECTION
+    // ===============================
+    const isRestarting =
+      d &&
+      !d.online &&
+      (!d.connectEndPoints || d.connectEndPoints.length === 0) &&
+      d.hostname;
 
-    // STATUS
+    if (isRestarting) {
+      setStatus("offline");
+      document.getElementById("statusText").textContent = "Server restarting";
+
+      document.getElementById("serverName").textContent = d.hostname;
+      document.getElementById("serverIP").textContent = "Restarting...";
+
+      let banner =
+        d.banner_connecting ||
+        d.banner_detail ||
+        d.icon ||
+        d.vars?.banner_connecting ||
+        d.vars?.banner_detail ||
+        null;
+
+      if (banner) {
+        document.getElementById("serverBannerWrap").style.display = "block";
+        document.getElementById("serverBanner").src = banner;
+      }
+
+      document.getElementById("statBuild").textContent = d.server || "N/A";
+      document.getElementById("statLocale").textContent = d.locale || "N/A";
+
+      renderPlayerCards([]);
+      renderResourceChips([]);
+
+      document.getElementById("serverInfo").style.display = "flex";
+      return;
+    }
+
+    // ===============================
+    // NORMAL ONLINE SERVER
+    // ===============================
+    document.getElementById("serverName").textContent = d.hostname || "Unknown Server";
     setStatus("online");
 
-    // IP
     const ip = d.connectEndPoints?.[0] || "Hidden";
     document.getElementById("serverIP").textContent = `IP: ${ip}`;
 
-    // ICON
     if (d.icon) {
       document.getElementById("serverIcon").style.backgroundImage = `url(${d.icon})`;
     }
 
-    // BANNER FIX
     let banner =
       d.banner_connecting ||
       d.banner_detail ||
@@ -277,28 +313,19 @@ async function analyzeCFX() {
       document.getElementById("serverBannerWrap").style.display = "none";
     }
 
-    // STATS
     document.getElementById("statBuild").textContent = d.server || "N/A";
     document.getElementById("statLocale").textContent = d.locale || "N/A";
 
-    // PLAYERS
     renderPlayerCards(d.players || []);
-
-    // RESOURCES
     renderResourceChips(d.resources || []);
 
-    // DESCRIPTION
     document.getElementById("serverDesc").textContent = d.vars?.sv_projectDesc || "";
-
-    // LOCATION
     document.getElementById("serverLoc").textContent = d.vars?.locale || "";
 
-    // COUNTRY
     if (d.vars?.country) {
       document.getElementById("serverCountry").textContent = `Country: ${d.vars.country}`;
     }
 
-    // SHOW UI
     document.getElementById("serverInfo").style.display = "flex";
     document.getElementById("openFullPanel").style.display = "block";
 
