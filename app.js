@@ -1,5 +1,5 @@
-// CFX code to load (change this to any CFX ID you want)
-const CFX_CODE = "o9kk7r"; // example: Zephyr; replace with your own if needed
+// CHANGE THIS TO ANY CFX CODE YOU WANT TO LOAD
+const CFX_CODE = "o9kk7r";
 
 // Load server info on page load
 window.addEventListener("DOMContentLoaded", () => {
@@ -68,67 +68,36 @@ async function loadServer(cfx) {
 
 // Wire up all button actions
 function wireButtons({ ipFull, cfx, d, url }) {
-  // Copy IP
-  const copyIPBtn = document.getElementById("copyIP");
-  if (copyIPBtn) {
-    copyIPBtn.onclick = () => {
-      if (ipFull !== "Unknown") navigator.clipboard.writeText(ipFull);
-    };
-  }
+  document.getElementById("copyIP").onclick = () => {
+    if (ipFull !== "Unknown") navigator.clipboard.writeText(ipFull);
+  };
 
-  // Copy CFX
-  const copyCFXBtn = document.getElementById("copyCFX");
-  if (copyCFXBtn) {
-    copyCFXBtn.onclick = () => navigator.clipboard.writeText(cfx);
-  }
+  document.getElementById("copyCFX").onclick = () =>
+    navigator.clipboard.writeText(cfx);
 
-  // Open in FiveM
-  const openFiveMBtn = document.getElementById("openFiveM");
-  if (openFiveMBtn) {
-    openFiveMBtn.onclick = () => {
-      if (ipFull !== "Unknown") window.location.href = `fivem://connect/${ipFull}`;
-    };
-  }
+  document.getElementById("openFiveM").onclick = () => {
+    if (ipFull !== "Unknown") window.location.href = `fivem://connect/${ipFull}`;
+  };
 
-  // Discord
-  const discordBtn = document.getElementById("openDiscord");
-  if (discordBtn) {
-    const discordLink = d.vars && d.vars.Discord ? d.vars.Discord : null;
-    discordBtn.onclick = () => {
-      if (discordLink) window.open(discordLink, "_blank");
-    };
-  }
+  document.getElementById("openDiscord").onclick = () => {
+    if (d.vars?.Discord) window.open(d.vars.Discord, "_blank");
+  };
 
-  // Website
-  const websiteBtn = document.getElementById("openWebsite");
-  if (websiteBtn) {
-    const websiteLink = d.vars && d.vars.Website ? d.vars.Website : null;
-    websiteBtn.onclick = () => {
-      if (websiteLink) window.open(websiteLink, "_blank");
-    };
-  }
+  document.getElementById("openWebsite").onclick = () => {
+    if (d.vars?.Website) window.open(d.vars.Website, "_blank");
+  };
 
-  // Players JSON
-  const playersJSONBtn = document.getElementById("playersJSON");
-  if (playersJSONBtn) {
-    playersJSONBtn.onclick = () => {
-      window.open(
-        `https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`,
-        "_blank"
-      );
-    };
-  }
+  document.getElementById("playersJSON").onclick = () =>
+    window.open(
+      `https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`,
+      "_blank"
+    );
 
-  // Server Info JSON
-  const serverJSONBtn = document.getElementById("serverJSON");
-  if (serverJSONBtn) {
-    serverJSONBtn.onclick = () => {
-      window.open(url, "_blank");
-    };
-  }
+  document.getElementById("serverJSON").onclick = () =>
+    window.open(url, "_blank");
 }
 
-// GeoIP lookup for locale
+// GeoIP lookup
 async function fetchGeoIP(ip) {
   try {
     const res = await fetch(`https://ipapi.co/${ip}/json/`);
@@ -142,8 +111,7 @@ async function fetchGeoIP(ip) {
       : "";
 
     return `${country} ${flag}`;
-  } catch (err) {
-    console.error("GeoIP error:", err);
+  } catch {
     return "Unknown";
   }
 }
