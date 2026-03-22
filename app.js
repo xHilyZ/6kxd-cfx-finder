@@ -178,11 +178,15 @@ async function analyzeCFX() {
       document.getElementById("serverIcon").style.backgroundImage = `url(${d.icon})`;
     }
 
-    // BANNER FIX
+    // ===============================
+    // BANNER FIX (ALL POSSIBLE LOCATIONS)
+    // ===============================
     let banner =
       d.banner_connecting ||
       d.banner_detail ||
       d.icon ||
+      d.vars?.banner_connecting ||
+      d.vars?.banner_detail ||
       null;
 
     if (banner) {
