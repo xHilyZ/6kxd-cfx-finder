@@ -304,6 +304,7 @@ function renderPlayers(players) {
     p.name?.toLowerCase().includes(searchTerm) ||
     String(p.id).includes(searchTerm)
   );
+
   if (!filtered.length) {
     playersList.innerHTML = "<div class='player-row'>No matching players.</div>";
     return;
@@ -352,3 +353,308 @@ function renderPlayers(players) {
     playersList.appendChild(row);
   });
 }
+
+// ===============================
+// SERVER INFO PANEL
+// ===============================
+
+function renderInfoPanel(d, code) {
+  serverInfoList.innerHTML = "";
+
+  const vars = d.vars || {};
+
+  const infoItems = [
+    { label: "CFX Code", value: code },
+    { label: "Game Build", value: vars.sv_enforceGameBuild || vars.gamebuild || "Unknown" },
+    { label: "Locale", value: vars.locale || "Unknown" },
+    { label: "Max Players", value: d.sv_maxclients || d.maxClients || d.maxplayers || "Unknown" },
+    { label: "Current Players", value: (d.players && d.players.length) || 0 },
+    { label: "Project Name", value: vars.sv_projectName || "N/A" },
+    { label: "Project Desc", value: vars.sv_projectDesc || "N/A" },
+    { label: "Tags", value: vars.tags || "N/A" }
+  ];
+
+  infoItems.forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="label">${item.label}</span>
+      <span class="value">${item.value}</span>
+    `;
+    serverInfoList.appendChild(li);
+  });
+
+  if (d.uptime) {
+    const hours = Math.floor(d.uptime / 3600);
+    const mins = Math.floor((d.uptime % 3600) / 60);
+    uptimeText.textContent = `${hours}h ${mins}m`;
+  } else {
+    uptimeText.textContent = "Unknown";
+  }
+}
+
+// ===============================
+// MAIN LOOKUP
+// ===============================
+
+async function analyzeCFX() {
+  const raw = cfxInput.value.trim();
+  const code = extractCFX(raw);
+
+  if (!code || code.length < 4) {
+    setStatus("offline", "Invalid CFX code");
+    return;
+  }
+
+  currentCode = code;
+  setStatus("loading", "Checking server…");
+  setLoadingState(true);
+
+  try {
+    const res = await fetch(`/api/resolve?code=${code}`);
+
+    if (!res.ok) {
+      setStatus("offline", "Server not found or offline");
+      setLoadingState(false);
+      return;
+    }
+
+    const data = await res.json();
+    if (!data || !data.Data) {
+      setStatus("offline", "Invalid or private server");
+      setLoadingState(false);
+      return;
+    }
+
+    const d = data.Data;
+    currentServerData = d;
+
+    setStatus("online", "Server Online");
+
+    serverName.textContent = d.hostname || "Unknown";
+    serverPlayers.textContent = `${d.players?.length || 0} players`;
+
+    if (d.icon) {
+      serverIcon.src = `data:image/png;base64,${d.icon}`;
+      serverIcon.style.display = "block";
+    } else {
+      serverIcon.style.display = "none";
+    }
+
+    const bannerUrl =
+      (d.vars && (d.vars.banner_connecting || d.vars.banner_detail)) || null;
+
+    if (bannerUrl) {
+      serverBanner.onload = () => serverBanner.classList.add("loaded");
+      serverBanner.src = bannerUrl;
+      serverBanner.style.display = "block";
+    } else {
+      serverBanner.style.display = "none";
+    }
+
+    serverEndpoints.innerHTML = "";
+    (d.connectEndPoints || []).forEach(ip => {
+      const li = document.createElement("li");
+      li.textContent = ip;
+      serverEndpoints.appendChild(li);
+    });
+
+    currentResources = d.resources || [];
+    renderResources("gameplay");
+
+    currentPlayers = d.players || [];
+    renderPlayers(currentPlayers);
+
+    renderInfoPanel(d, code);
+
+    const isFav = favorites.find(f => f.code === code);
+    favoriteBtn.textContent = isFav ? "★ Favorited" : "⭐ Favorite";
+
+    favoriteBtn.onclick = () => toggleFavorite(code, d.hostname || "Unknown");
+
+    joinBtn.disabled = false;
+    joinBtn.onclick = () => {
+      if (d.connectEndPoints && d.connectEndPoints.length) {
+        window.location.href = `fivem://connect/${d.connectEndPoints[0]}`;
+      } else {
+        window.open(`https://cfx.re/join/${code}`, "_blank");
+      }
+    };
+
+    addToHistory(code, d.hostname || "Unknown");
+
+  } catch (err) {
+    console.error(err);
+    setStatus("offline", "Proxy error — check backend");
+  } finally {
+    setLoadingState(false);
+  }
+}
+
+// ===============================
+// SEARCH LISTENERS
+// ===============================
+
+playerSearch.addEventListener("input", () => {
+  renderPlayers(currentPlayers);
+});
+
+resourceSearch.addEventListener("input", () => {
+  const activeTab = document.querySelector(".resource-tab.active");
+  renderResources(activeTab.dataset.cat);
+});
+
+// ===============================
+// GLOBAL SERVER BROWSER
+// ===============================
+
+async function loadGlobalServers() {
+  browserTableBody.innerHTML = `
+    <tr><td colspan="5" class="muted">Loading…</td></tr>
+  `;
+
+  try {
+    const res = await fetch("/api/servers");
+    if (!res.ok) {
+      browserTableBody.innerHTML = `
+        <tr><td colspan="5" class="muted">Failed to load servers.</td></tr>
+      `;
+      return;
+    }
+
+    const list = await res.json();
+    renderBrowserTable(list);
+
+  } catch (err) {
+    browserTableBody.innerHTML = `
+      <tr><td colspan="5" class="muted">Error loading servers.</td></tr>
+    `;
+  }
+}
+
+function renderBrowserTable(list) {
+  const search = browserSearch.value.toLowerCase();
+
+  const filtered = list.filter(s =>
+    s.hostname.toLowerCase().includes(search) ||
+    (s.vars?.tags || "").toLowerCase().includes(search) ||
+    (s.vars?.locale || "").toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    browserTableBody.innerHTML = `
+      <tr><td colspan="5" class="muted">No servers match your search.</td></tr>
+    `;
+    return;
+  }
+
+  browserTableBody.innerHTML = "";
+
+  filtered.forEach(s => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${s.hostname}</td>
+      <td>${s.players?.length || 0}</td>
+      <td>${s.vars?.locale || "—"}</td>
+      <td>${s.vars?.tags || "—"}</td>
+      <td><button class="outline-btn small-btn" data-code="${s.joinId}">Join</button></td>
+    `;
+
+    tr.querySelector("button").onclick = () => {
+      window.open(`https://cfx.re/join/${s.joinId}`, "_blank");
+    };
+
+    browserTableBody.appendChild(tr);
+  });
+}
+
+browserRefresh.addEventListener("click", loadGlobalServers);
+
+browserSearch.addEventListener("input", () => {
+  if (browserTableBody.children.length > 0) {
+    loadGlobalServers();
+  }
+});
+
+// ===============================
+// SIDEBAR NAVIGATION
+// ===============================
+
+function switchView(view) {
+  sidebarItems.forEach(i => i.classList.remove("active"));
+  views.forEach(v => v.classList.remove("active"));
+
+  document.querySelector(`[data-view="${view}"]`).classList.add("active");
+  document.getElementById(`view-${view}`).classList.add("active");
+}
+
+sidebarItems.forEach(item => {
+  item.addEventListener("click", () => {
+    const view = item.dataset.view;
+    switchView(view);
+
+    if (view === "browser") loadGlobalServers();
+    if (view === "favorites") renderFavorites();
+    if (view === "history") renderHistory();
+  });
+});
+
+// ===============================
+// THEME
+// ===============================
+
+function initTheme() {
+  const saved = localStorage.getItem("cfxTheme");
+  if (saved === "light") {
+    document.body.classList.add("light");
+    themeToggle.textContent = "Light";
+  } else {
+    document.body.classList.remove("light");
+    themeToggle.textContent = "Dark";
+  }
+}
+
+themeToggle.addEventListener("click", () => {
+  const isLight = document.body.classList.toggle("light");
+  localStorage.setItem("cfxTheme", isLight ? "light" : "dark");
+  themeToggle.textContent = isLight ? "Light" : "Dark";
+});
+
+// ===============================
+// WELCOME SCREEN
+// ===============================
+
+function dismissWelcome() {
+  if (!welcomeOverlay.classList.contains("hidden")) {
+    welcomeOverlay.classList.add("fade-out");
+    pageWrap.classList.add("visible");
+
+    setTimeout(() => {
+      welcomeOverlay.classList.add("hidden");
+    }, 600);
+  }
+}
+
+enterBtn.addEventListener("click", dismissWelcome);
+
+// Auto-dismiss after 1.5s
+setTimeout(dismissWelcome, 1500);
+
+// ===============================
+// EVENTS
+// ===============================
+
+analyzeBtn.addEventListener("click", analyzeCFX);
+
+cfxInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") analyzeCFX();
+});
+
+// ===============================
+// INIT
+// ===============================
+
+initTheme();
+renderHistory();
+renderFavorites();
+setTopStatus("idle", "Idle");
