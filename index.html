@@ -122,6 +122,11 @@
                   <ul id="serverEndpoints" class="small-list"></ul>
                 </div>
 
+                <!-- NEW BUTTON -->
+                <button id="openFullPanel" class="primary-btn fullpanel-btn">
+                  View Full Players & Resources
+                </button>
+
                 <div class="panel glass-soft players-panel-full">
                   <div class="panel-header">
                     <h3>Players 👥</h3>
@@ -210,6 +215,28 @@
           </div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- FULL PANEL MODAL -->
+  <div id="fullPanelOverlay" class="fullpanel-overlay hidden">
+    <div class="fullpanel glass">
+      <div class="fullpanel-header">
+        <h2>Players & Resources</h2>
+        <button id="closeFullPanel" class="outline-btn small-btn">Close</button>
+      </div>
+
+      <div class="fullpanel-content">
+        <div class="fullpanel-column">
+          <h3>Players</h3>
+          <div id="fullPlayersList" class="scroll-list"></div>
+        </div>
+
+        <div class="fullpanel-column">
+          <h3>Resources</h3>
+          <div id="fullResourcesList" class="scroll-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
