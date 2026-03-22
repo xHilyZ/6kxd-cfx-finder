@@ -316,7 +316,7 @@ input {
   pointer-events: all;
 }
 
-/* FULL PANEL — NOW A SMALLER CENTERED BOX */
+/* FULL PANEL */
 .full-panel {
   position: fixed;
   bottom: -100%;
@@ -412,24 +412,43 @@ input {
 .ping-mid { color: #facc15; }
 .ping-bad { color: #f87171; }
 
-/* RESOURCES */
-#fullResources ul {
-  list-style: none;
-  padding-left: 0;
+/* ============================================================
+   RESOURCE CATEGORIES + GLASS TAGS (NEW)
+============================================================ */
+.resource-category {
+  margin-bottom: 25px;
 }
 
-#fullResources li {
-  padding: 6px 0;
-  border-bottom: 1px solid #1e293b;
-  color: #cbd5e1;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-  transition: 0.2s ease;
+.resource-category h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #e6e6e6;
 }
 
-#fullResources li:hover {
-  color: #93c5fd;
-  transform: translateX(4px);
+.resource-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resource-tag {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: default;
+  transition: 0.15s ease;
+  user-select: none;
+}
+
+.resource-tag:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
 }
 
 /* CLOSE BUTTON */

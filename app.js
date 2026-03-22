@@ -14,42 +14,16 @@
 
     /* ============================================================
        PAGE DETECTION
-    ============================================================ */
+    ============================================================= */
     const path = window.location.pathname.toLowerCase();
     const isHome = path.includes("index") || path.endsWith("/") || path.endsWith("/index.html");
     const isServer = path.includes("server");
 
-    /* ============================================================
-       SAFE ELEMENT GETTER
-    ============================================================ */
     const $ = id => document.getElementById(id);
 
     /* ============================================================
-       UTILS
-    ============================================================ */
-    const escapeHTML = str =>
-      String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-    const cleanName = name => name.replace(/\^[0-9]/g, "");
-
-    async function fetchGeoIP(ip) {
-      try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/`);
-        const data = await res.json();
-
-        const flag = data.country
-          ? String.fromCodePoint(...[...data.country].map(c => 127397 + c.charCodeAt()))
-          : "";
-
-        return `${data.country_name || "Unknown"} ${flag}`;
-      } catch {
-        return "Unknown";
-      }
-    }
-
-    /* ============================================================
        HOMEPAGE LOGIC
-    ============================================================ */
+    ============================================================= */
     if (isHome) {
       const input = $("cfxInput");
       const analyzeBtn = $("analyzeBtn");
@@ -108,12 +82,12 @@
       };
 
       loadRecent();
-      return; // STOP HERE — do NOT run server code
+      return;
     }
 
     /* ============================================================
        SERVER PAGE LOGIC
-    ============================================================ */
+    ============================================================= */
     if (isServer) {
       let lastData = null;
 
@@ -144,8 +118,10 @@
 
       const playerSearch = $("playerSearch");
       const resourceSearch = $("resourceSearch");
-      const resourceSort = $("resourceSort");
 
+      /* ============================================================
+         FETCH HELPERS
+      ============================================================= */
       async function fetchServer(code) {
         const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
         const res = await fetch(url);
@@ -158,55 +134,111 @@
         let players = [];
         let resources = [];
 
+        // players.json
         try {
           const p = await fetch(`${base}/players.json`);
           if (p.ok) players = await p.json();
         } catch {}
 
+        // resources.json
         try {
           const r = await fetch(`${base}/resources.json`);
           if (r.ok) resources = await r.json();
         } catch {}
 
+        // dynamic.json fallback
+        if (!resources.length) {
+          try {
+            const d = await fetch(`${base}/dynamic.json`);
+            if (d.ok) {
+              const dyn = await d.json();
+              if (dyn.resources) resources = dyn.resources.map(r => r.name);
+            }
+          } catch {}
+        }
+
+        // info.json fallback
+        if (!resources.length) {
+          try {
+            const i = await fetch(`${base}/info.json`);
+            if (i.ok) {
+              const info = await i.json();
+              if (info.resources) resources = info.resources;
+            }
+          } catch {}
+        }
+
         return { players, resources };
       }
 
-      function renderHeatmap(players) {
-        if (!players || players.length === 0) {
-          pingHeatmap.style.display = "none";
-          return;
-        }
+      /* ============================================================
+         RESOURCE CATEGORY DETECTION (Option 1)
+      ============================================================= */
+      function detectCategory(name) {
+        const n = name.toLowerCase();
 
-        pingHeatmap.style.display = "block";
-        pingHeatmap.innerHTML = "";
+        if (n.match(/job|police|crime|weapon|craft|ambulance|mechanic|taxi|bus|gang|role|tools|armoury/))
+          return "Gameplay";
 
-        const ranges = {
-          "0–50ms": players.filter(p => p.ping <= 50).length,
-          "50–100ms": players.filter(p => p.ping > 50 && p.ping <= 100).length,
-          "100–150ms": players.filter(p => p.ping > 100 && p.ping <= 150).length,
-          "150ms+": players.filter(p => p.ping > 150).length
-        };
+        if (n.match(/ui|hud|menu|radial|chat|imageui|interface/))
+          return "Interface";
 
-        const max = Math.max(...Object.values(ranges));
+        if (n.match(/car|vehicle|garage|keys|audio|mileage|radiocar/))
+          return "Vehicles";
 
-        for (const [label, count] of Object.entries(ranges)) {
-          const row = document.createElement("div");
-          row.className = "heatmap-row";
+        if (n.match(/map|mlo|interior|gabz|hospital|club|pier|postal/))
+          return "Maps";
 
-          const lbl = document.createElement("div");
-          lbl.className = "heatmap-label";
-          lbl.textContent = label;
+        if (n.match(/addon|script|inventory|ox_|qb_|qbx_|rcore_|randol_/))
+          return "Scripts";
 
-          const bar = document.createElement("div");
-          bar.className = "heatmap-bar";
-          bar.style.width = `${(count / max) * 100}%`;
+        return "Other";
+      }
 
-          row.appendChild(lbl);
-          row.appendChild(bar);
-          pingHeatmap.appendChild(row);
+      /* ============================================================
+         RENDER RESOURCES (glass tags, alphabetical categories)
+      ============================================================= */
+      function renderFullResources(resources) {
+        const categories = {};
+
+        resources.forEach(r => {
+          const cat = detectCategory(r);
+          if (!categories[cat]) categories[cat] = [];
+          categories[cat].push(r);
+        });
+
+        const sortedCats = Object.keys(categories).sort();
+
+        let html = "";
+
+        sortedCats.forEach(cat => {
+          if (categories[cat].length === 0) return; // hide empty categories
+
+          html += `<div class="resource-category">
+                     <h3>${cat} (${categories[cat].length})</h3>
+                     <div class="resource-tags">`;
+
+          categories[cat].forEach(r => {
+            html += `<span class="resource-tag glass">${r}</span>`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        fullResources.innerHTML = html;
+
+        if (resourceSearch) {
+          resourceSearch.oninput = () => {
+            const q = resourceSearch.value.toLowerCase();
+            const filtered = resources.filter(r => r.toLowerCase().includes(q));
+            renderFullResources(filtered);
+          };
         }
       }
 
+      /* ============================================================
+         RENDER PLAYERS
+      ============================================================= */
       function renderFullPlayers(players) {
         let html = "<ul>";
         players.forEach(p => {
@@ -218,7 +250,7 @@
           html += `
             <li>
               <span class="player-id">[${p.id}]</span>
-              <span class="player-name">${escapeHTML(p.name)}</span>
+              <span class="player-name">${p.name}</span>
               <span class="player-ping ${pingClass}">${p.ping}ms</span>
             </li>
           `;
@@ -239,30 +271,9 @@
         }
       }
 
-      function renderFullResources(resources) {
-        let html = "<ul>";
-        resources.forEach(r => {
-          html += `<li>${escapeHTML(r)}</li>`;
-        });
-        html += "</ul>";
-        fullResources.innerHTML = html;
-
-        if (resourceSearch) {
-          resourceSearch.oninput = () => {
-            const q = resourceSearch.value.toLowerCase();
-            const filtered = resources.filter(r => r.toLowerCase().includes(q));
-            renderFullResources(filtered);
-          };
-        }
-
-        if (resourceSort) {
-          resourceSort.onclick = () => {
-            const sorted = [...resources].sort();
-            renderFullResources(sorted);
-          };
-        }
-      }
-
+      /* ============================================================
+         LOAD SERVER
+      ============================================================= */
       async function loadServer(code) {
         try {
           const data = await fetchServer(code);
@@ -277,7 +288,7 @@
             serverBannerWrap.style.display = "none";
           }
 
-          nameEl.textContent = escapeHTML(cleanName(d.hostname));
+          nameEl.textContent = d.hostname;
           ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
 
           playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
@@ -285,17 +296,24 @@
           buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
           localeEl.textContent = d.locale || "Unknown";
 
-          descEl.textContent = escapeHTML(d.vars?.sv_projectDesc || "No description");
+          descEl.textContent = d.vars?.sv_projectDesc || "No description";
           locEl.textContent = "Location info unavailable.";
 
           const ip = d.connectEndPoints?.[0]?.split(":")[0];
           if (ip) {
-            countryEl.textContent = await fetchGeoIP(ip);
+            try {
+              const res = await fetch(`https://ipapi.co/${ip}/json/`);
+              const geo = await res.json();
+              const flag = geo.country
+                ? String.fromCodePoint(...[...geo.country].map(c => 127397 + c.charCodeAt()))
+                : "";
+              countryEl.textContent = `${geo.country_name || "Unknown"} ${flag}`;
+            } catch {
+              countryEl.textContent = "Unknown";
+            }
           }
 
           serverInfo.style.opacity = "1";
-
-          renderHeatmap(d.players);
 
         } catch (err) {
           alert("Failed to load server info.");
@@ -303,6 +321,9 @@
         }
       }
 
+      /* ============================================================
+         FULL PANEL OPEN
+      ============================================================= */
       if (openFullPanel) {
         openFullPanel.onclick = async () => {
           if (!lastData) return alert("Run a lookup first.");
@@ -357,5 +378,5 @@
       return;
     }
 
-  }); // END domReady
+  });
 })();
