@@ -58,7 +58,7 @@
 
         list.forEach(code => {
           const tag = document.createElement("div");
-          tag.className = "recent-tag glass";
+          tag.className = "recent-item";
           tag.textContent = code;
           tag.onclick = () => (window.location.href = `server.html?code=${code}`);
           recentList.appendChild(tag);
@@ -120,55 +120,12 @@
       const resourceSearch = $("resourceSearch");
 
       /* ============================================================
-         FETCH HELPERS
+         FETCH HELPERS (use backend resolver)
       ============================================================= */
       async function fetchServer(code) {
-        const url = `https://servers-frontend.fivem.net/api/servers/single/${code}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("CFX API error");
+        const res = await fetch(`/api/server/${code}`);
+        if (!res.ok) throw new Error("Resolver error");
         return res.json();
-      }
-
-      async function fetchInternal(ipPort) {
-        const base = `http://${ipPort}`;
-        let players = [];
-        let resources = [];
-
-        // players.json
-        try {
-          const p = await fetch(`${base}/players.json`);
-          if (p.ok) players = await p.json();
-        } catch {}
-
-        // resources.json
-        try {
-          const r = await fetch(`${base}/resources.json`);
-          if (r.ok) resources = await r.json();
-        } catch {}
-
-        // dynamic.json fallback
-        if (!resources.length) {
-          try {
-            const d = await fetch(`${base}/dynamic.json`);
-            if (d.ok) {
-              const dyn = await d.json();
-              if (dyn.resources) resources = dyn.resources.map(r => r.name);
-            }
-          } catch {}
-        }
-
-        // info.json fallback
-        if (!resources.length) {
-          try {
-            const i = await fetch(`${base}/info.json`);
-            if (i.ok) {
-              const info = await i.json();
-              if (info.resources) resources = info.resources;
-            }
-          } catch {}
-        }
-
-        return { players, resources };
       }
 
       /* ============================================================
@@ -212,7 +169,7 @@
         let html = "";
 
         sortedCats.forEach(cat => {
-          if (categories[cat].length === 0) return; // hide empty categories
+          if (categories[cat].length === 0) return;
 
           html += `<div class="resource-category">
                      <h3>${cat} (${categories[cat].length})</h3>
@@ -226,14 +183,6 @@
         });
 
         fullResources.innerHTML = html;
-
-        if (resourceSearch) {
-          resourceSearch.oninput = () => {
-            const q = resourceSearch.value.toLowerCase();
-            const filtered = resources.filter(r => r.toLowerCase().includes(q));
-            renderFullResources(filtered);
-          };
-        }
       }
 
       /* ============================================================
@@ -257,29 +206,17 @@
         });
         html += "</ul>";
         fullPlayers.innerHTML = html;
-
-        if (playerSearch) {
-          playerSearch.oninput = () => {
-            const q = playerSearch.value.toLowerCase();
-            const filtered = players.filter(p =>
-              p.name.toLowerCase().includes(q) ||
-              String(p.id).includes(q) ||
-              String(p.ping).includes(q)
-            );
-            renderFullPlayers(filtered);
-          };
-        }
       }
 
       /* ============================================================
-         LOAD SERVER
+         LOAD SERVER (via resolver)
       ============================================================= */
       async function loadServer(code) {
         try {
           const data = await fetchServer(code);
           lastData = data;
 
-          const d = data.Data;
+          const d = data.meta.Data;
 
           if (d.vars?.banner_detail) {
             serverBanner.src = d.vars.banner_detail;
@@ -289,17 +226,17 @@
           }
 
           nameEl.textContent = d.hostname;
-          ipEl.textContent = `IP: ${d.connectEndPoints?.[0] || "Unknown"}`;
+          ipEl.textContent = `IP: ${data.ipPort || "Hidden / Unknown"}`;
 
           playersEl.textContent = `${d.clients} / ${d.sv_maxclients}`;
-          resourcesEl.textContent = d.resources.length;
+          resourcesEl.textContent = data.resources?.length || d.resources?.length || 0;
           buildEl.textContent = d.vars?.sv_enforceGameBuild || "Unknown";
           localeEl.textContent = d.locale || "Unknown";
 
           descEl.textContent = d.vars?.sv_projectDesc || "No description";
           locEl.textContent = "Location info unavailable.";
 
-          const ip = d.connectEndPoints?.[0]?.split(":")[0];
+          const ip = data.ipPort ? data.ipPort.split(":")[0] : null;
           if (ip) {
             try {
               const res = await fetch(`https://ipapi.co/${ip}/json/`);
@@ -311,6 +248,8 @@
             } catch {
               countryEl.textContent = "Unknown";
             }
+          } else {
+            countryEl.textContent = "Unknown";
           }
 
           serverInfo.style.opacity = "1";
@@ -322,21 +261,14 @@
       }
 
       /* ============================================================
-         FULL PANEL OPEN
+         FULL PANEL OPEN (use resolver data only)
       ============================================================= */
       if (openFullPanel) {
         openFullPanel.onclick = async () => {
           if (!lastData) return alert("Run a lookup first.");
 
-          const d = lastData.Data;
-          const ipPort = d.connectEndPoints?.[0];
-
-          if (!ipPort) {
-            alert("Server IP unavailable.");
-            return;
-          }
-
-          const { players, resources } = await fetchInternal(ipPort);
+          const players = lastData.players || [];
+          const resources = lastData.resources || [];
 
           if (!players.length) {
             fullPlayers.innerHTML =
@@ -350,6 +282,28 @@
               "<div class='resource-row glass'>Resource list hidden or unavailable.</div>";
           } else {
             renderFullResources(resources);
+          }
+
+          if (playerSearch) {
+            playerSearch.oninput = () => {
+              const q = playerSearch.value.toLowerCase();
+              const filtered = players.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                String(p.id).includes(q) ||
+                String(p.ping).includes(q)
+              );
+              renderFullPlayers(filtered);
+            };
+          }
+
+          if (resourceSearch) {
+            resourceSearch.oninput = () => {
+              const q = resourceSearch.value.toLowerCase();
+              const filtered = resources.filter(r =>
+                r.toLowerCase().includes(q)
+              );
+              renderFullResources(filtered);
+            };
           }
 
           fullPanel.classList.add("open");
