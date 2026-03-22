@@ -14,7 +14,7 @@
 
   <div class="container">
 
-    <!-- AUTO REFRESH (REQUIRED FOR JS TO WORK) -->
+    <!-- AUTO REFRESH (REQUIRED FOR JS) -->
     <div class="auto-refresh glass">
       <label for="autoRefreshSelect">Auto-refresh:</label>
       <select id="autoRefreshSelect">
@@ -34,6 +34,7 @@
 
       <div class="server-right">
 
+        <!-- STATUS -->
         <div class="server-status-row">
           <div id="serverStatusDot" class="status-dot"></div>
           <h2 id="serverName" class="server-name"></h2>
@@ -42,10 +43,12 @@
 
         <p id="serverIP"></p>
 
+        <!-- BANNER -->
         <div id="serverBannerWrap" class="banner-wrap" style="display:none;">
           <img id="serverBanner" class="server-banner" alt="Server Banner">
         </div>
 
+        <!-- STATS GRID -->
         <div class="stats-grid">
           <div class="stat-box glass">
             <h4>Players</h4>
@@ -65,10 +68,12 @@
           </div>
         </div>
 
+        <!-- DESCRIPTION + LOCATION + COUNTRY -->
         <p id="serverDesc" class="server-desc"></p>
         <p id="serverLoc" class="server-loc"></p>
         <p id="serverCountry" class="server-country"></p>
 
+        <!-- PING HEATMAP -->
         <div id="pingHeatmap" class="ping-heatmap glass" style="display:none;"></div>
 
       </div>
