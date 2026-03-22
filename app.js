@@ -117,6 +117,7 @@ async function loadServerInfo(cfx) {
     }
 
     const d = data.Data;
+    const vars = d.vars || {};
 
     /* ------------------------------
        ONLINE STATUS (FIXED)
@@ -132,15 +133,15 @@ async function loadServerInfo(cfx) {
     /* ------------------------------
        BASIC INFO
     ------------------------------ */
-    document.getElementById("serverName").textContent = d.hostname;
+    document.getElementById("serverName").textContent = d.hostname || "Unknown";
     document.getElementById("serverIP").textContent =
       d.connectEndPoints?.[0] || "Unknown";
 
     /* ------------------------------
        BANNER
     ------------------------------ */
-    if (d.vars?.banner_detail) {
-      document.getElementById("serverBanner").src = d.vars.banner_detail;
+    if (vars.banner_detail) {
+      document.getElementById("serverBanner").src = vars.banner_detail;
       document.getElementById("serverBannerWrap").style.display = "block";
     } else {
       document.getElementById("serverBannerWrap").style.display = "none";
@@ -150,13 +151,13 @@ async function loadServerInfo(cfx) {
        STATS
     ------------------------------ */
     document.getElementById("statPlayers").textContent =
-      `${d.clients} / ${d.sv_maxclients}`;
+      `${d.clients || 0} / ${d.sv_maxclients || 0}`;
 
     document.getElementById("statResources").textContent =
       Array.isArray(d.resources) ? d.resources.length : 0;
 
     document.getElementById("statBuild").textContent =
-      d.vars?.sv_enforceGameBuild || "Unknown";
+      vars.sv_enforceGameBuild || "Unknown";
 
     /* ------------------------------
        GEOIP (SAFE)
@@ -170,13 +171,13 @@ async function loadServerInfo(cfx) {
        DESCRIPTION + LOCATION + COUNTRY (SAFE)
     ------------------------------ */
     document.getElementById("serverDesc").textContent =
-      d.vars?.sv_projectDesc || "";
+      vars.sv_projectDesc || "";
 
     document.getElementById("serverLoc").textContent =
-      d.vars?.locale || d.vars?.sv_locale || d.vars?.language || "";
+      vars.locale || vars.sv_locale || vars.language || "";
 
     document.getElementById("serverCountry").textContent =
-      d.vars?.country || "Unknown";
+      vars.country || "Unknown";
 
     /* ------------------------------
        JSON BUTTONS
@@ -191,7 +192,7 @@ async function loadServerInfo(cfx) {
       window.open(url, "_blank");
 
     /* ------------------------------
-       FULL PANEL BUTTON
+       FULL PANEL BUTTON (NOW ALWAYS WORKS)
     ------------------------------ */
     document.getElementById("openFullPanel").onclick = () =>
       openFullPanel(d);
@@ -202,7 +203,7 @@ async function loadServerInfo(cfx) {
     setupAutoRefresh(cfx);
 
   } catch (err) {
-    console.error(err);
+    console.error("Server load error:", err);
     alert("Failed to load server info.");
   }
 }
