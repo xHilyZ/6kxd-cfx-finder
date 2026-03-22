@@ -24,7 +24,9 @@ const pageWrap = document.querySelector(".page-wrap");
 
 let currentCode = null;
 
-// Status helper
+// ===============================
+// STATUS TEXT
+// ===============================
 function setStatus(type, message) {
     statusText.textContent = message;
 
@@ -43,7 +45,9 @@ function setStatus(type, message) {
     }
 }
 
-// Extract CFX code
+// ===============================
+// EXTRACT CFX CODE
+// ===============================
 function extractCFX(input) {
     if (!input) return null;
     if (input.includes("cfx.re/join/")) {
@@ -52,7 +56,9 @@ function extractCFX(input) {
     return input.trim();
 }
 
-// Shimmer helpers
+// ===============================
+// SHIMMER LOADING
+// ===============================
 function setLoadingState(isLoading) {
     const shimmerTargets = [
         serverName,
@@ -74,20 +80,16 @@ function setLoadingState(isLoading) {
         }
     });
 
-    if (isLoading) {
-        joinBtn.disabled = true;
-    }
+    if (isLoading) joinBtn.disabled = true;
 }
 
-// History
+// ===============================
+// HISTORY SYSTEM
+// ===============================
 function loadHistory() {
     const raw = localStorage.getItem("cfxHistory");
     if (!raw) return [];
-    try {
-        return JSON.parse(raw);
-    } catch {
-        return [];
-    }
+    try { return JSON.parse(raw); } catch { return []; }
 }
 
 function saveHistory(history) {
@@ -116,6 +118,7 @@ function renderHistory() {
 
     history.forEach(item => {
         const li = document.createElement("li");
+
         const codeSpan = document.createElement("span");
         codeSpan.className = "code";
         codeSpan.textContent = item.code;
@@ -135,7 +138,9 @@ function renderHistory() {
     });
 }
 
-// Theme
+// ===============================
+// THEME TOGGLE
+// ===============================
 function initTheme() {
     const saved = localStorage.getItem("cfxTheme");
     if (saved === "light") {
@@ -153,14 +158,16 @@ themeToggle.addEventListener("click", () => {
     themeToggle.textContent = isLight ? "Light" : "Dark";
 });
 
-// Info panel
+// ===============================
+// INFO PANEL
+// ===============================
 function renderInfoPanel(d, code) {
     serverInfoList.innerHTML = "";
 
     const vars = d.vars || {};
 
     const infoItems = [
-        { label: "CFX Code", value: code || "Unknown" },
+        { label: "CFX Code", value: code },
         { label: "Game Build", value: vars.sv_enforceGameBuild || vars.gamebuild || "Unknown" },
         { label: "Locale", value: vars.locale || "Unknown" },
         { label: "Max Players", value: d.sv_maxclients || d.maxClients || d.maxplayers || "Unknown" },
@@ -187,7 +194,9 @@ function renderInfoPanel(d, code) {
     });
 }
 
-// Main lookup
+// ===============================
+// MAIN LOOKUP
+// ===============================
 async function analyzeCFX() {
     const raw = cfxInput.value.trim();
     const code = extractCFX(raw);
@@ -211,7 +220,6 @@ async function analyzeCFX() {
         }
 
         const data = await res.json();
-
         if (!data || !data.Data) {
             setStatus("offline", "Invalid or private server");
             setLoadingState(false);
@@ -231,9 +239,7 @@ async function analyzeCFX() {
         if (d.icon) {
             serverIcon.src = `data:image/png;base64,${d.icon}`;
             serverIcon.style.display = "block";
-        } else {
-            serverIcon.style.display = "none";
-        }
+        } else serverIcon.style.display = "none";
 
         // Banner
         const bannerUrl =
@@ -242,9 +248,7 @@ async function analyzeCFX() {
         if (bannerUrl) {
             serverBanner.src = bannerUrl;
             serverBanner.style.display = "block";
-        } else {
-            serverBanner.style.display = "none";
-        }
+        } else serverBanner.style.display = "none";
 
         // Endpoints
         serverEndpoints.innerHTML = "";
@@ -300,8 +304,7 @@ async function analyzeCFX() {
         joinBtn.disabled = false;
         joinBtn.onclick = () => {
             if (d.connectEndPoints && d.connectEndPoints.length) {
-                const ip = d.connectEndPoints[0];
-                window.location.href = `fivem://connect/${ip}`;
+                window.location.href = `fivem://connect/${d.connectEndPoints[0]}`;
             } else {
                 window.open(`https://cfx.re/join/${code}`, "_blank");
             }
@@ -324,24 +327,34 @@ async function analyzeCFX() {
     }
 }
 
-// Welcome screen logic (auto + click)
+// ===============================
+// WELCOME SCREEN (FADE OUT)
+// ===============================
 function dismissWelcome() {
     if (!welcomeOverlay.classList.contains("hidden")) {
-        welcomeOverlay.classList.add("hidden");
+        welcomeOverlay.classList.add("fade-out");
         pageWrap.classList.add("visible");
+
+        setTimeout(() => {
+            welcomeOverlay.classList.add("hidden");
+        }, 600);
     }
 }
 
 enterBtn.addEventListener("click", dismissWelcome);
 setTimeout(dismissWelcome, 1500);
 
-// Events
+// ===============================
+// EVENTS
+// ===============================
 analyzeBtn.addEventListener("click", analyzeCFX);
 cfxInput.addEventListener("keypress", e => {
     if (e.key === "Enter") analyzeCFX();
 });
 
-// Init
+// ===============================
+// INIT
+// ===============================
 initTheme();
 renderHistory();
 setLoadingState(false);

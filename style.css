@@ -53,7 +53,7 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 50;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
+    transition: opacity 0.6s ease;
 }
 
 .welcome-overlay.hidden {
@@ -83,7 +83,7 @@ body {
     margin-bottom: 16px;
 }
 
-/* Layout */
+/* Page fade-in */
 
 .page-wrap {
     max-width: 1120px;
@@ -94,7 +94,7 @@ body {
     gap: 16px;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .page-wrap.visible {
@@ -102,13 +102,14 @@ body {
     transform: translateY(0);
 }
 
+/* Header */
+
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
     position: relative;
-    overflow: hidden;
 }
 
 .header::after {
@@ -164,6 +165,8 @@ body {
     background: var(--accent-soft);
     border-color: var(--accent1);
 }
+
+/* Layout */
 
 .main {
     display: grid;
