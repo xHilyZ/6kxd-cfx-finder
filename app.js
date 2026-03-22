@@ -119,19 +119,22 @@ async function loadServerInfo(cfx) {
     const d = data.Data;
 
     /* ------------------------------
+       ONLINE STATUS (FIXED)
+    ------------------------------ */
+    const isOnline = (d.clients > 0) || d.online;
+
+    document.getElementById("serverStatusText").textContent =
+      isOnline ? "Online" : "Offline";
+
+    document.getElementById("serverStatusDot").style.background =
+      isOnline ? "#00d26a" : "#ff4d4d";
+
+    /* ------------------------------
        BASIC INFO
     ------------------------------ */
     document.getElementById("serverName").textContent = d.hostname;
     document.getElementById("serverIP").textContent =
       d.connectEndPoints?.[0] || "Unknown";
-
-    const isOnline = d.online;
-    document.getElementById("serverStatusText").textContent = isOnline
-      ? "Online"
-      : "Offline";
-    document.getElementById("serverStatusDot").style.background = isOnline
-      ? "#00d26a"
-      : "#ff4d4d";
 
     /* ------------------------------
        BANNER
@@ -148,8 +151,10 @@ async function loadServerInfo(cfx) {
     ------------------------------ */
     document.getElementById("statPlayers").textContent =
       `${d.clients} / ${d.sv_maxclients}`;
+
     document.getElementById("statResources").textContent =
-      d.resources?.length || 0;
+      Array.isArray(d.resources) ? d.resources.length : 0;
+
     document.getElementById("statBuild").textContent =
       d.vars?.sv_enforceGameBuild || "Unknown";
 
@@ -162,14 +167,16 @@ async function loadServerInfo(cfx) {
       ip ? await fetchGeoIP(ip) : "Unknown";
 
     /* ------------------------------
-       DESCRIPTION + LOCATION + COUNTRY
+       DESCRIPTION + LOCATION + COUNTRY (SAFE)
     ------------------------------ */
     document.getElementById("serverDesc").textContent =
       d.vars?.sv_projectDesc || "";
+
     document.getElementById("serverLoc").textContent =
-      d.vars?.locale || "";
+      d.vars?.locale || d.vars?.sv_locale || d.vars?.language || "";
+
     document.getElementById("serverCountry").textContent =
-      d.vars?.country || "";
+      d.vars?.country || "Unknown";
 
     /* ------------------------------
        JSON BUTTONS
@@ -184,7 +191,7 @@ async function loadServerInfo(cfx) {
       window.open(url, "_blank");
 
     /* ------------------------------
-       FULL PANEL
+       FULL PANEL BUTTON
     ------------------------------ */
     document.getElementById("openFullPanel").onclick = () =>
       openFullPanel(d);
@@ -235,8 +242,8 @@ function openFullPanel(data) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("fullPanel").style.display = "block";
 
-  loadFullPlayers(data.players || []);
-  loadFullResources(data.resources || []);
+  loadFullPlayers(Array.isArray(data.players) ? data.players : []);
+  loadFullResources(Array.isArray(data.resources) ? data.resources : []);
 
   document.getElementById("closePanel").onclick = closeFullPanel;
 }
