@@ -8,30 +8,93 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="page-wrap">
 
-        <header>
-            <h1>6KXD CFX Finder</h1>
-            <p class="subtitle">Fast. Clean. Reliable.</p>
+        <header class="header glass">
+            <div class="brand">
+                <div class="brand-mark">6KXD</div>
+                <div class="brand-text">
+                    <h1>CFX Finder</h1>
+                    <p>Fast • Clean • Neon</p>
+                </div>
+            </div>
+            <button id="themeToggle" class="theme-toggle">Dark</button>
         </header>
 
-        <div class="card glass">
-            <label for="cfxInput">Enter CFX Code</label>
-            <div class="input-row">
-                <input id="cfxInput" type="text" placeholder="e.g. abc123">
-                <button id="analyzeBtn">Lookup</button>
-            </div>
-            <p id="statusText" class="status">Waiting for input…</p>
-        </div>
+        <main class="main">
 
-        <div class="results glass">
-            <h2 id="serverName">Server Name</h2>
-            <img id="serverIcon" class="server-icon" style="display:none;">
-            <p id="serverPlayers">0 players</p>
+            <section class="card glass input-card">
+                <div class="input-header">
+                    <div>
+                        <label for="cfxInput">Enter CFX Code</label>
+                        <p class="hint">Paste a code or full cfx.re link</p>
+                    </div>
+                    <button id="analyzeBtn" class="primary-btn">Lookup</button>
+                </div>
+                <div class="input-row">
+                    <input id="cfxInput" type="text" placeholder="e.g. abc123">
+                </div>
+                <p id="statusText" class="status">Waiting for input…</p>
+            </section>
 
-            <h3>Endpoints</h3>
-            <ul id="serverEndpoints"></ul>
-        </div>
+            <section class="card glass history-card">
+                <div class="section-header">
+                    <h2>Recent Lookups</h2>
+                </div>
+                <ul id="historyList" class="history-list">
+                    <!-- Filled by JS -->
+                </ul>
+            </section>
+
+            <section class="results-panel glass slide-panel" id="resultsPanel">
+                <div class="slide-handle"></div>
+
+                <div class="results-header">
+                    <div>
+                        <h2 id="serverName" class="server-title shimmer">Server Name</h2>
+                        <p id="serverPlayers" class="server-sub shimmer">0 players</p>
+                    </div>
+                    <div class="results-actions">
+                        <button id="joinBtn" class="outline-btn" disabled>Join Server</button>
+                    </div>
+                </div>
+
+                <div class="banner-row">
+                    <img id="serverBanner" class="server-banner shimmer" style="display:none;">
+                    <img id="serverIcon" class="server-icon shimmer" style="display:none;">
+                </div>
+
+                <div class="results-grid">
+
+                    <div class="panel glass-soft">
+                        <h3>Endpoints</h3>
+                        <ul id="serverEndpoints" class="list small-list shimmer">
+                            <!-- Filled by JS -->
+                        </ul>
+                    </div>
+
+                    <div class="panel glass-soft">
+                        <h3>Resources</h3>
+                        <ul id="serverResources" class="list small-list shimmer">
+                            <!-- Filled by JS -->
+                        </ul>
+                    </div>
+
+                    <div class="panel glass-soft players-panel">
+                        <h3>Players</h3>
+                        <div id="playersList" class="players-list shimmer">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="footer glass">
+            <p>Built for 6KXD • CFX Lookup • Minimal Neon Glass</p>
+        </footer>
 
     </div>
 
