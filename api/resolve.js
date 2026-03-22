@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const response = await fetch(url);
 
     if (!response.ok) {
-      return res.status(404).json({ error: "Server not found" });
+      return res.status(404).json({ error: "Server not found or offline" });
     }
 
     const data = await response.json();

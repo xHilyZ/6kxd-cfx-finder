@@ -195,7 +195,7 @@ function renderInfoPanel(d, code) {
 }
 
 // ===============================
-// MAIN LOOKUP
+// MAIN LOOKUP (NOW USING PROXY)
 // ===============================
 async function analyzeCFX() {
     const raw = cfxInput.value.trim();
@@ -211,7 +211,8 @@ async function analyzeCFX() {
     setLoadingState(true);
 
     try {
-        const res = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${code}`);
+        // ⭐ NEW: Use your backend proxy
+        const res = await fetch(`/api/resolve?code=${code}`);
 
         if (!res.ok) {
             setStatus("offline", "Server not found or offline");
@@ -321,7 +322,7 @@ async function analyzeCFX() {
 
     } catch (err) {
         console.error(err);
-        setStatus("offline", "Error contacting CFX API");
+        setStatus("offline", "Proxy error — check backend");
     } finally {
         setLoadingState(false);
     }
