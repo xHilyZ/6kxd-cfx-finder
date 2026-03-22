@@ -9,63 +9,122 @@
 
 <body>
 
-    <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h1 class="centered-title">6kxd CFX Finder</h1>
+    </div>
 
-        <h1 class="title">6kxd CFX Finder</h1>
-
-        <!-- SERVER NAME SEARCH -->
-        <div class="search-row">
+    <!-- SEARCH ALL SERVERS (NEW) -->
+    <div class="global-search glass">
+        <div class="input-card">
             <input id="globalSearchInput" type="text" placeholder="Search all servers...">
-            <button id="globalSearchBtn" class="search-btn">Search</button>
+            <button id="globalSearchBtn" class="btn-primary">Search</button>
         </div>
+    </div>
 
-        <h2>CFX.re Server Finder</h2>
-        <p>Get detailed information about any FiveM server instantly</p>
+    <!-- MAIN TITLE + SUBTITLE -->
+    <h1 class="title">CFX.re Server Finder</h1>
+    <p class="subtitle">Get detailed information about any FiveM server instantly</p>
 
-        <!-- CFX CODE SEARCH -->
+    <!-- CFX CODE INPUT -->
+    <div class="glass input-card" style="max-width:900px; margin:0 auto;">
         <input id="cfxInput" type="text" placeholder="Paste CFX link, IP:PORT, or any message containing a code">
-        <button id="analyzeBtn" class="analyze-btn">Analyze</button>
+        <button id="analyzeBtn" class="btn-primary">Analyze</button>
+    </div>
 
-        <!-- STATUS -->
-        <div class="status-bar">
-            <span id="statusDot" class="status-dot"></span>
-            <span id="statusText">Waiting...</span>
-        </div>
+    <!-- STATUS BAR -->
+    <div class="glass status-bar" style="max-width:900px; margin:20px auto;">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText" class="status-text">Waiting...</span>
+    </div>
 
-        <!-- SERVER INFO -->
-        <div id="serverInfo" style="display:none;">
-            <h3 id="serverName"></h3>
-            <p id="serverIP"></p>
+    <!-- GREETING -->
+    <div id="greeting" class="glass greeting" style="max-width:900px; margin:0 auto;">
+        Ready to search. Enter a CFX code above.
+    </div>
 
-            <div id="serverBannerWrap" style="display:none;">
-                <img id="serverBanner" />
+    <!-- SERVER INFO CARD -->
+    <div id="serverInfo" class="glass server-card" style="max-width:900px; margin:30px auto; display:none;">
+
+        <!-- LEFT SIDE -->
+        <div class="server-left">
+            <div id="serverIcon" class="server-icon"></div>
+
+            <div class="server-status-row">
+                <h2 id="serverName" class="server-name"></h2>
             </div>
 
-            <p><strong>Build:</strong> <span id="statBuild"></span></p>
-            <p><strong>Locale:</strong> <span id="statLocale"></span></p>
-            <p><strong>Description:</strong> <span id="serverDesc"></span></p>
-            <p><strong>Location:</strong> <span id="serverLoc"></span></p>
-            <p><strong>Country:</strong> <span id="serverCountry"></span></p>
+            <p id="serverIP"></p>
 
-            <button id="openFullPanel">View Players & Resources</button>
+            <div id="serverCountry" class="server-country"></div>
         </div>
 
-        <!-- FULL PANEL -->
-        <div id="overlay"></div>
-        <div id="fullPanel">
-            <button id="closePanel">Close</button>
+        <!-- RIGHT SIDE -->
+        <div class="server-right">
 
-            <h3>Players</h3>
-            <input id="playerSearch" type="text" placeholder="Search players...">
-            <div id="fullPlayers"></div>
+            <div id="serverBannerWrap" class="banner-wrap" style="display:none;">
+                <img id="serverBanner" class="server-banner">
+            </div>
 
-            <h3>Resources</h3>
-            <input id="resourceSearch" type="text" placeholder="Search resources...">
-            <button id="resourceSort">Sort</button>
-            <div id="fullResources"></div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>Players</h4>
+                    <p id="statPlayers">0</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Resources</h4>
+                    <p id="statResources">0</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Build</h4>
+                    <p id="statBuild">N/A</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Locale</h4>
+                    <p id="statLocale">N/A</p>
+                </div>
+            </div>
+
+            <p id="serverDesc"></p>
+            <p id="serverLoc"></p>
+
+            <button id="openFullPanel" class="btn-secondary full-btn">View Players & Resources</button>
         </div>
-
     </div>
+
+    <!-- FULL PANEL OVERLAY -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- FULL PANEL -->
+    <div id="fullPanel" class="glass full-panel">
+
+        <h2 class="panel-title">Server Details</h2>
+
+        <div class="panel-grid">
+
+            <!-- PLAYERS -->
+            <div>
+                <h3 class="panel-heading">Players</h3>
+                <input id="playerSearch" class="panel-search" type="text" placeholder="Search players...">
+                <div id="fullPlayers"></div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div>
+                <h3 class="panel-heading">Resources</h3>
+                <div class="resource-controls">
+                    <input id="resourceSearch" class="panel-search" type="text" placeholder="Search resources...">
+                    <button id="resourceSort" class="btn-secondary small">Sort</button>
+                </div>
+                <div id="fullResources"></div>
+            </div>
+
+        </div>
+
+        <button id="closePanel" class="close-btn">Close</button>
+    </div>
+
+    <div class="footer">Built by 6kxd | Powered by CFX.re</div>
 
     <script src="app.js"></script>
 </body>
