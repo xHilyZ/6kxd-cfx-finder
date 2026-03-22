@@ -34,8 +34,6 @@ const browserRefresh = document.getElementById("browserRefresh");
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 const views = document.querySelectorAll(".view");
 
-const welcomeOverlay = document.getElementById("welcomeOverlay");
-const enterBtn = document.getElementById("enterBtn");
 const pageWrap = document.querySelector(".page-wrap");
 
 const themeToggle = document.getElementById("themeToggle");
@@ -619,26 +617,6 @@ themeToggle.addEventListener("click", () => {
   localStorage.setItem("cfxTheme", isLight ? "light" : "dark");
   themeToggle.textContent = isLight ? "Light" : "Dark";
 });
-
-// ===============================
-// WELCOME SCREEN
-// ===============================
-
-function dismissWelcome() {
-  if (!welcomeOverlay.classList.contains("hidden")) {
-    welcomeOverlay.classList.add("fade-out");
-    pageWrap.classList.add("visible");
-
-    setTimeout(() => {
-      welcomeOverlay.classList.add("hidden");
-    }, 600);
-  }
-}
-
-enterBtn.addEventListener("click", dismissWelcome);
-
-// Auto-dismiss after 1.5s
-setTimeout(dismissWelcome, 1500);
 
 // ===============================
 // EVENTS
