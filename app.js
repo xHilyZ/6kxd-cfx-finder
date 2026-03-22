@@ -1,26 +1,18 @@
 /* ============================================================
-   GLOBALS
+   PAGE DETECTION
 ============================================================ */
 
-let autoRefreshTimer = null;
-
-/* ============================================================
-   PAGE LOAD
-============================================================ */
-
-window.addEventListener("DOMContentLoaded", () => {
-  setupHomepage();
-});
+const isHome = window.location.pathname.includes("index.html") || window.location.pathname === "/";
+const isServer = window.location.pathname.includes("server.html");
 
 /* ============================================================
    HOMEPAGE LOGIC
 ============================================================ */
 
-function setupHomepage() {
+if (isHome) {
   const input = document.getElementById("cfxInput");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const clearRecent = document.getElementById("clearRecent");
-  const recentLookups = document.getElementById("recentLookups");
 
   loadRecentLookups();
 
@@ -32,7 +24,7 @@ function setupHomepage() {
   clearRecent.onclick = () => {
     localStorage.removeItem("recentCFX");
     document.getElementById("recentList").innerHTML = "";
-    recentLookups.style.display = "none";
+    document.getElementById("recentLookups").style.display = "none";
   };
 }
 
@@ -47,12 +39,8 @@ function handleAnalyze() {
   }
 
   saveRecentLookup(code);
-  loadServerInfo(code);
+  window.location.href = `server.html?code=${code}`;
 }
-
-/* ============================================================
-   RECENT LOOKUPS
-============================================================ */
 
 function extractCFX(str) {
   const match = str.match(/[a-zA-Z0-9]{6}/);
@@ -84,14 +72,27 @@ function loadRecentLookups() {
     const tag = document.createElement("div");
     tag.className = "recent-tag glass";
     tag.textContent = code;
-    tag.onclick = () => loadServerInfo(code);
+    tag.onclick = () => window.location.href = `server.html?code=${code}`;
     container.appendChild(tag);
   });
 }
 
 /* ============================================================
-   SERVER INFO LOADING
+   SERVER PAGE LOGIC
 ============================================================ */
+
+if (isServer) {
+  const params = new URLSearchParams(window.location.search);
+  const cfx = params.get("code");
+
+  if (!cfx) {
+    alert("No CFX code provided.");
+  } else {
+    loadServerInfo(cfx);
+  }
+}
+
+let autoRefreshTimer = null;
 
 async function loadServerInfo(cfx) {
   stopAutoRefresh();
@@ -101,23 +102,8 @@ async function loadServerInfo(cfx) {
   try {
     const res = await fetch(url);
     const data = await res.json();
-
-    if (!data || !data.Data) {
-      alert("Invalid CFX code or server not found.");
-      return;
-    }
-
     const d = data.Data;
 
-    // Show server card
-    document.getElementById("greeting").style.display = "none";
-    document.getElementById("serverInfo").style.display = "flex";
-    document.getElementById("jsonButtons").style.display = "flex";
-    document.getElementById("openFullPanel").style.display = "block";
-
-    /* ------------------------------
-       BASIC INFO
-    ------------------------------ */
     document.getElementById("serverName").textContent = d.hostname;
     document.getElementById("serverIP").textContent = d.connectEndPoints?.[0] || "Unknown";
 
@@ -125,9 +111,6 @@ async function loadServerInfo(cfx) {
     document.getElementById("serverStatusText").textContent = isOnline ? "Online" : "Offline";
     document.getElementById("serverStatusDot").style.background = isOnline ? "#00d26a" : "#ff4d4d";
 
-    /* ------------------------------
-       BANNER
-    ------------------------------ */
     if (d.vars?.banner_detail) {
       document.getElementById("serverBanner").src = d.vars.banner_detail;
       document.getElementById("serverBannerWrap").style.display = "block";
@@ -135,37 +118,22 @@ async function loadServerInfo(cfx) {
       document.getElementById("serverBannerWrap").style.display = "none";
     }
 
-    /* ------------------------------
-       STATS
-    ------------------------------ */
     document.getElementById("statPlayers").textContent = `${d.clients} / ${d.sv_maxclients}`;
     document.getElementById("statResources").textContent = d.resources.length;
     document.getElementById("statBuild").textContent = d.vars?.sv_enforceGameBuild || "Unknown";
 
-    /* ------------------------------
-       GEOIP
-    ------------------------------ */
     const ip = (d.connectEndPoints?.[0] || "").split(":")[0];
     document.getElementById("statLocale").textContent = await fetchGeoIP(ip);
 
-    /* ------------------------------
-       JSON BUTTONS
-    ------------------------------ */
     document.getElementById("playersJson").onclick = () =>
       window.open(`https://servers-frontend.fivem.net/api/servers/single/${cfx}/players`, "_blank");
 
     document.getElementById("infoJson").onclick = () =>
       window.open(url, "_blank");
 
-    /* ------------------------------
-       FULL PANEL BUTTON
-    ------------------------------ */
     document.getElementById("openFullPanel").onclick = () =>
       openFullPanel(d);
 
-    /* ------------------------------
-       AUTO REFRESH
-    ------------------------------ */
     setupAutoRefresh(cfx);
 
   } catch (err) {
@@ -187,8 +155,6 @@ function setupAutoRefresh(cfx) {
     if (interval > 0) {
       autoRefreshTimer = setInterval(() => {
         loadServerInfo(cfx);
-        document.getElementById("lastRefresh").textContent =
-          `Last refreshed: ${new Date().toLocaleTimeString()}`;
       }, interval);
     }
   };
@@ -220,10 +186,6 @@ function closeFullPanel() {
   document.getElementById("fullPanel").style.display = "none";
 }
 
-/* ============================================================
-   FULL PANEL — PLAYERS
-============================================================ */
-
 function loadFullPlayers(players) {
   const container = document.getElementById("fullPlayers");
   container.innerHTML = "";
@@ -235,10 +197,6 @@ function loadFullPlayers(players) {
     container.appendChild(div);
   });
 }
-
-/* ============================================================
-   FULL PANEL — RESOURCES
-============================================================ */
 
 function loadFullResources(resources) {
   const container = document.getElementById("fullResources");
@@ -258,7 +216,7 @@ function loadFullResources(resources) {
 }
 
 /* ============================================================
-   GEOIP LOOKUP
+   GEOIP
 ============================================================ */
 
 async function fetchGeoIP(ip) {
