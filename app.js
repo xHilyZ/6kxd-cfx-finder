@@ -41,7 +41,7 @@ let currentResources = [];
 let favorites = loadFavorites();
 
 // ===============================
-// HELPERS
+// STATUS + HELPERS
 // ===============================
 
 function setStatus(type, message) {
@@ -343,7 +343,10 @@ function renderInfoPanel(d, code) {
 
   infoItems.forEach(item => {
     const li = document.createElement("li");
-    li.innerHTML = `<span class="label">${item.label}</span><span class="value">${item.value}</span>`;
+    li.innerHTML = `
+      <span class="label">${item.label}</span>
+      <span class="value">${item.value}</span>
+    `;
     serverInfoList.appendChild(li);
   });
 
@@ -613,4 +616,4 @@ cfxInput.addEventListener("keypress", e => {
 
 initTheme();
 renderHistory();
-render
+renderFavorites();

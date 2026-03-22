@@ -10,7 +10,7 @@
   <div id="welcomeOverlay" class="welcome-overlay">
     <div class="welcome-card glass">
       <h1>6KXD CFX Finder</h1>
-      <p class="welcome-sub">Premium cyber lookup system for Zephyr & friends.</p>
+      <p class="welcome-sub">Premium cyber lookup system for 6KXD & friends.</p>
       <button id="enterBtn" class="primary-btn">Enter</button>
     </div>
   </div>
@@ -19,9 +19,9 @@
     <!-- Sidebar -->
     <aside class="sidebar glass">
       <div class="sidebar-brand">
-        <div class="sidebar-logo">Z</div>
+        <div class="sidebar-logo">6</div>
         <div class="sidebar-text">
-          <div class="sidebar-title">Zephyr Tools</div>
+          <div class="sidebar-title">6KXD Tools</div>
           <div class="sidebar-sub">CFX Suite</div>
         </div>
       </div>
@@ -123,18 +123,22 @@
                   </div>
                 </div>
 
+                <!-- Banner -->
                 <div class="banner-row">
                   <img id="serverIcon" class="server-icon shimmer loading" style="display:none;" />
                   <img id="serverBanner" class="server-banner shimmer loading" style="display:none;" />
                 </div>
 
-                <div class="results-grid">
-                  <div class="panel glass-soft">
-                    <h3>Endpoints</h3>
-                    <ul id="serverEndpoints" class="small-list"></ul>
-                  </div>
+                <!-- Endpoints under banner -->
+                <div class="panel glass-soft endpoints-panel">
+                  <h3>Endpoints</h3>
+                  <ul id="serverEndpoints" class="small-list"></ul>
+                </div>
 
-                  <div class="panel glass-soft">
+                <!-- Resources + Players grid -->
+                <div class="results-grid-2">
+                  <!-- RESOURCES LEFT -->
+                  <div class="panel glass-soft resources-panel">
                     <h3>Resources 📦</h3>
                     <div class="resource-tabs">
                       <button class="resource-tab active" data-cat="gameplay">Gameplay</button>
@@ -147,6 +151,7 @@
                     <ul id="serverResources" class="small-list"></ul>
                   </div>
 
+                  <!-- PLAYERS RIGHT -->
                   <div class="panel glass-soft players-panel">
                     <h3>Players 👥</h3>
                     <div id="playersList" class="players-list"></div>
